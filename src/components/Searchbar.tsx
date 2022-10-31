@@ -52,6 +52,11 @@ const Searchbar = ({
 				list="names"
 				placeholder={placeHolder}
 				ref={ref}
+				onKeyDown={e => {
+					if (e.code == 'Enter' && ref.current) {
+						search(ref.current.value);
+					}
+				}}
 			/>
 			<datalist id="names">{list}</datalist>
 			<button
@@ -59,6 +64,7 @@ const Searchbar = ({
 				onClick={() => {
 					if (ref.current) search(ref.current.value);
 				}}
+				
 			>
 				{' '}
 				Search{' '}

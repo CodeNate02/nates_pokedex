@@ -138,7 +138,7 @@ const FormTabs = ({
 							onClick={() => setSel(index)}
 							style={{
 								right: `${0.5 * index}em`,
-								zIndex: sel == index ? 100 : index,
+								zIndex: sel == index ? 25 : 25 - index,
 							}}
 						>
 							{formattedNames[index]}
@@ -153,7 +153,7 @@ const FormTabs = ({
 /*Formats provided strings into capitalized forms, can capitalize either first word or every word*/
 const capitalize = (string: string, words: 'all' | 'first' = 'all') => {
 	let w;
-	if ((words = 'all')) w = string.split(' ');
+	if ((words == 'all')) w = string.split(' ');
 	else w = ([] as string[]).concat(string);
 	let r = [] as string[];
 	w.forEach(x => {
@@ -171,21 +171,20 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 			),
 		[pkmn]
 	);
-	console.log(FlavorTexts);
 	return (
 		<section
 			id="FlavorText"
-			className="grid grid-cols-[2em_30em_2em] bg-stone-100 p-1 rounded-lg border-black border-2"
+			className="grid grid-cols-[3em_30em_3em] bg-stone-100 p-1 rounded-lg border-black border-2 w-fit m-auto mt-2 h-36"
 		>
 			<button
 				onClick={() => {
 					if (text > 0) setText(text - 1);
 				}}
+				className='border border-black p-1 rounded-l-2xl bg-red-400 hover:underline'
 			>
-				{' '}
-				Prev.{' '}
+				{'<'}
 			</button>
-			<section className="px-5">
+			<section className="px-5 flex flex-col justify-center border-y border-black">
 				<p>{FlavorTexts[text].flavor_text}</p>
 				<p className="text-right w-full">
 					-Pokémon{' '}
@@ -198,9 +197,9 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 				onClick={() => {
 					if (text < FlavorTexts.length - 1) setText(text + 1);
 				}}
+				className='border border-black bg-gray-200 p-1 rounded-r-2xl hover:underline'
 			>
-				{' '}
-				Next{' '}
+				{'>'}
 			</button>
 		</section>
 	);
