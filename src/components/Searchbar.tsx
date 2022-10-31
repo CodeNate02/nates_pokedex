@@ -27,7 +27,7 @@ const Searchbar = ({
 		searchDB(searchType, term).then(data => {
 			if (data) {
 				dispatch(setState(data, 'data')); //Store data from the search in the Redux store
-				navigate(`${routeTo}/${term}`);
+				navigate(`/${routeTo}/${term}`);
 			}
 		});
 	};

@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useSelector, useDispatch, setState as setRedux } from '../redux';
 import { useParams } from 'react-router';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import searchDB, { getPkmnForms, Spinner } from '../db';
+import Searchbar from '../components/Searchbar';
 
 const Species = () => {
 	const [state, setState] = useState<'loading' | 'error' | 'ready'>(
@@ -12,14 +13,16 @@ const Species = () => {
 		info = useParams().id?.toLowerCase(), //id checks the URL
 		dispatch = useDispatch(); //Dispatches updates to the redux store
 	useEffect(() => {
-		//CHECK IF CURRENT URL MATCHES THE POKEMON STORED IN THE REDUX STORE
+		//CHECK IF CURRENT URL MATCHES THE Pokémon STORED IN THE REDUX STORE (likely if the user reached this page from a searchbar)
 		//IF THEY DON'T MATCH, GRAB FRESH INFORMATION
+		setState('loading');
 		if (!(species.id == info || species.name == info)) {
 			searchDB('pokemon-species', info || 'error').then(result => {
 				if (result) dispatch(setRedux(result, 'data'));
 				else setState('error');
 			});
 		} else {
+			document.title = `${capitalize(species.name)} - Nate's Pokédex`;
 			setState('ready');
 		}
 	}, [species]);
@@ -29,7 +32,19 @@ const Species = () => {
 		case 'error':
 			return <Navigate to="/" />;
 		case 'ready':
-			return <PkmnInfo s={species} />;
+			return (
+				<>
+					<header className="w-full static flex content-center">
+						<Link to="/"> {'<'} </Link>
+						<Searchbar placeHolder="Find Another" />
+						<Link to="/">
+							{' '}
+							{'>' /*Replace later with a react-icon*/}{' '}
+						</Link>
+					</header>
+					<PkmnInfo s={species} />
+				</>
+			);
 	}
 };
 export default Species;
@@ -40,8 +55,9 @@ const PkmnInfo = ({ s }: { s: any }) => {
 	);
 	const [selected, select] = useState(0);
 	useEffect(() => {
+		setForms('loading');
 		getPkmnForms(s.varieties).then(x => setForms(x));
-	}, []);
+	}, [s]);
 	switch (forms) {
 		case 'loading':
 			return <Spinner />;
@@ -55,18 +71,34 @@ const PkmnInfo = ({ s }: { s: any }) => {
 				<div className="border-double border-8 border-black bg-stone-100 rounded-xl m-auto w-full relative">
 					<img
 						src={forms[selected].sprites.front_default}
-						className="m-auto h-36 w-36"
+						className="m-auto h-36 w-36 mb-12"
 						alt="Image not Found"
 					/>
-					<h1 className="underline text-2xl font-medium text-center absolute bottom-0 w-full">
-						{s.names[8].name}
-					</h1>
+					<span className="w-full text-center absolute bottom-0">
+						<h1 className="underline text-2xl font-medium ">
+							{
+								s.names.filter(
+									(x: any) => x.language.name == 'en'
+								)[0].name
+							}
+						</h1>
+						<h2>
+							The{' '}
+							{
+								s?.genera.filter(
+									(x: any) => x.language.name == 'en'
+								)[0]?.genus
+							}
+						</h2>
+					</span>
 				</div>
 			</div>
+			<FlavorText pkmn={s} />
 		</div>
 	);
 };
 
+/* Form Tabs Formats/Creates tabs on top of Pokémon entry to navigate through various forms*/
 const FormTabs = ({
 	forms,
 	setSel,
@@ -87,20 +119,20 @@ const FormTabs = ({
 					n = n.slice(species.length + 1); //The DB's format begins form names with their default forms.  This is unnecessary and clutter-generating, so we can slice that part off
 				}
 				n = n[0].toUpperCase() + n.slice(1); //Capitalize the first letter
-                n=capitalize(n.split('-').join(' '));
+				n = capitalize(n.split('-').join(' '));
 				r.push(n); //Add the name to the array
 			}
 			return r;
 		},
-		formattedNames = useMemo(() => getNames(), []); //Memoize names with no need for any changes
+		formattedNames = useMemo(() => getNames(), [forms]); //Memoize names to only change if the forms provided change (IE on page change)
 	return (
 		<>
-			{forms.length > 1 && ( //If this Pokemon has forms
+			{forms.length > 1 && ( //If this Pokémon has forms
 				<ul className="flex relative left-2">
 					{forms.map((_item, index) => (
 						<li
 							key={index}
-							className={`rounded-t-xl bg-stone-100 px-2 border-black border-t-2 border-b border-x-2 relative ${
+							className={`rounded-t-xl bg-stone-100 px-2 border-black border-t-2 border-b border-x-2 relative hover:cursor-pointer ${
 								sel == index ? '-bottom-[2px] shadow-lg' : ''
 							}`}
 							onClick={() => setSel(index)}
@@ -118,13 +150,58 @@ const FormTabs = ({
 	);
 };
 
+/*Formats provided strings into capitalized forms, can capitalize either first word or every word*/
 const capitalize = (string: string, words: 'all' | 'first' = 'all') => {
 	let w;
 	if ((words = 'all')) w = string.split(' ');
 	else w = ([] as string[]).concat(string);
-    let r = ([] as string[]);
+	let r = [] as string[];
 	w.forEach(x => {
 		r.push(x[0].toUpperCase() + x.slice(1));
 	});
-    return(r.join(' '));
+	return r.join(' ');
+};
+
+const FlavorText = ({ pkmn }: { pkmn: any }) => {
+	const [text, setText] = useState(0);
+	const FlavorTexts = useMemo(
+		() =>
+			pkmn.flavor_text_entries.filter(
+				(x: any) => x.language.name == 'en'
+			),
+		[pkmn]
+	);
+	console.log(FlavorTexts);
+	return (
+		<section
+			id="FlavorText"
+			className="grid grid-cols-[2em_30em_2em] bg-stone-100 p-1 rounded-lg border-black border-2"
+		>
+			<button
+				onClick={() => {
+					if (text > 0) setText(text - 1);
+				}}
+			>
+				{' '}
+				Prev.{' '}
+			</button>
+			<section className="px-5">
+				<p>{FlavorTexts[text].flavor_text}</p>
+				<p className="text-right w-full">
+					-Pokémon{' '}
+					{capitalize(
+						FlavorTexts[text].version.name.split('-').join(' ')
+					)}
+				</p>
+			</section>
+			<button
+				onClick={() => {
+					if (text < FlavorTexts.length - 1) setText(text + 1);
+				}}
+			>
+				{' '}
+				Next{' '}
+			</button>
+		</section>
+	);
 };
