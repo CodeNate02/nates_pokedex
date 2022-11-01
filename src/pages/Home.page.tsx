@@ -1,8 +1,7 @@
 import Searchbar from '../components/Searchbar';
-import { Spinner } from '../db';
 const Home = () => {
 	return (
-		<div className="m-auto w-1/3 bg-white border-8 rounded-xl p-2 border-red-500">
+		<div className="m-auto w-fit bg-white border-8 rounded-xl p-2 border-red-500">
 			<h1 className="font-pressStart text-2xl text-center">
 				Nate's Pokédex
 			</h1>

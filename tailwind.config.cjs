@@ -7,7 +7,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily:{
-        pressStart:["'Press Start 2P'", 'sans-serif']
+        pressStart:["'Press Start 2P'", 'sans-serif'],
+        screen:["'Silkscreen'",'sans-serif'],
+        pkmn:["'Power Clear'","'Silkscreen'",'sans-serif']
       }
     },
   },

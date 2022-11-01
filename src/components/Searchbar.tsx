@@ -3,6 +3,7 @@ import { useQuery } from 'react-query';
 import { useDispatch, setState } from '../redux';
 import { useNavigate } from 'react-router';
 import searchDB from '../db';
+import { capitalize } from '../utils';
 
 const Searchbar = ({
 	searchType = 'pokemon-species',
@@ -41,7 +42,7 @@ const Searchbar = ({
 			(
 				item: any,
 				index: number //populate list with value names
-			) => <option key={index} value={format(item.name)} />
+			) => <option key={index} value={capitalize(item.name.split('-').join(' ')).split(' ').join('-')}/>
 		);
 	}
 	return (
@@ -55,16 +56,19 @@ const Searchbar = ({
 				onKeyDown={e => {
 					if (e.code == 'Enter' && ref.current) {
 						search(ref.current.value);
+						ref.current.value = '';
 					}
 				}}
 			/>
 			<datalist id="names">{list}</datalist>
 			<button
-				className="relative px-2 border border-gray-600 w-fit active:left-px active:shadow-inner"
+				className="relative px-2 border border-gray-600 w-fit active:left-px active:shadow-inner bg-slate-300"
 				onClick={() => {
-					if (ref.current) search(ref.current.value);
+					if (ref.current) {
+						search(ref.current.value);
+						ref.current.value = '';
+					}
 				}}
-				
 			>
 				{' '}
 				Search{' '}
@@ -73,8 +77,3 @@ const Searchbar = ({
 	);
 };
 export default Searchbar;
-
-const format = (str: string) => {
-	str = str[0].toUpperCase() + str.slice(1);
-	return str;
-};

@@ -12,6 +12,13 @@ export const getPkmnForms = async (v: any[]) => {
     for(let i=0; i<v.length; i++){
         let response = await fetch(v[i].pokemon.url)
         let data = await response.json();
+		if(data.forms.length>1){ //If the variation has multiple forms...
+			let formArray = [];
+			for( let i = 0; i<data.forms.length; i++){
+				
+			}
+		}
+		
         rv.push(data);
     }
 	return rv;

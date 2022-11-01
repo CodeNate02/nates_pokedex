@@ -4,7 +4,7 @@ import { store } from './redux';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import Home from './pages/Home.page';
 import { Routes } from 'react-router';
-import Species from './pages/Species.page';
+import Species from './pages/Species';
 
 const queryClient = new QueryClient();
 function App() {
