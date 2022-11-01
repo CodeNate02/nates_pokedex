@@ -3,7 +3,7 @@ import { ArrowButton } from '../../components/ArrowButton';
 import { useSelector, useDispatch, setState as setRedux } from '../../redux';
 import { useParams } from 'react-router';
 import { Link, Navigate } from 'react-router-dom';
-import searchDB, { getPkmnForms, Spinner } from '../../db';
+import searchDB, { getPkmnVariants, Spinner } from '../../db';
 import Searchbar from '../../components/Searchbar';
 import { capitalize } from '../../utils';
 import _ from './components';
@@ -72,7 +72,7 @@ const PkmnInfo = ({ s }: { s: any }) => {
 	const [selected, select] = useState(0);
 	useEffect(() => {
 		setForms('loading');
-		getPkmnForms(s.varieties).then(x => setForms(x));
+		getPkmnVariants(s.varieties).then(x => setForms(x));
 	}, [s]);
 	switch (forms) {
 		case 'loading':
@@ -83,10 +83,14 @@ const PkmnInfo = ({ s }: { s: any }) => {
 	return (
 		<div className="m-auto w-fit h-fit">
 			<div className="m-auto w-fit">
-				<_.FormTabs forms={forms} sel={selected} setSel={select} />
+				<_.VariantTabs forms={forms} sel={selected} setSel={select} />
 				<div className="relative w-full border-t-8 border-slate-900 rounded-xl w-min-36">
-					<div className="m-auto border-8 border-t-0 border-black border-double rounded-b-xl w-fit">
-						<_.PkmnImage sprites={forms[selected].sprites} />
+					<div className="m-auto border-8 border-t-0 border-black border-double rounded-b-xl w-fit bg-stone-100">
+						<_.PkmnImage
+							sprites={forms[selected].sprites}
+							typing = {forms[selected].types}
+							className={' z-0 h-32 w-36'}
+						/>
 						<span className="bottom-0 z-30 w-full leading-none text-center font-pkmn">
 							<h1 className="text-2xl underline">
 								{
@@ -107,6 +111,9 @@ const PkmnInfo = ({ s }: { s: any }) => {
 				</div>
 			</div>
 			<_.FlavorText pkmn={s} />
+			{forms[selected].forms.length > 1 && (
+				<_.PkmnForms formsArray={forms[selected].forms} />
+			) /*Load and display alternate forms if the Pokemon has them*/}
 		</div>
 	);
 };

@@ -7,20 +7,24 @@ const searchDB = async (searchType: string, term: string) => {
 	}
 };
 
+export const getPkmnVariants = async (v: any[]) => {
+	let rv = [] as any;
+	for (let i = 0; i < v.length; i++) {
+		let response = await fetch(v[i].pokemon.url);
+		let data = await response.json();
+		
+
+		rv.push({ ...data});
+	}
+	return rv;
+};
 export const getPkmnForms = async (v: any[]) => {
 	let rv = [] as any;
-    for(let i=0; i<v.length; i++){
-        let response = await fetch(v[i].pokemon.url)
-        let data = await response.json();
-		if(data.forms.length>1){ //If the variation has multiple forms...
-			let formArray = [];
-			for( let i = 0; i<data.forms.length; i++){
-				
-			}
-		}
-		
-        rv.push(data);
-    }
+	for (let i = 0; i < v.length; i++) {
+		let response = await fetch(v[i].url);
+		let data = await response.json();
+		rv.push({ ...data});
+	}
 	return rv;
 };
 
@@ -29,7 +33,7 @@ export const Spinner = () => {
 		<div className="w-20 h-20 m-auto">
 			<img
 				src="/Pokeball.svg"
-				className="animate-spin h-fit w-fit m-auto"
+				className="m-auto animate-spin h-fit w-fit"
 			/>
 		</div>
 	);

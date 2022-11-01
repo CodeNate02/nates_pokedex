@@ -1,9 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { HiSparkles } from 'react-icons/hi2';
+import { useQuery } from 'react-query';
+import { getPkmnForms, Spinner } from '../../db';
 import { capitalize } from '../../utils';
 
 /* Form Tabs Formats/Creates tabs on top of Pokémon entry to navigate through various forms*/
-const FormTabs = ({
+const VariantTabs = ({
 	forms,
 	setSel,
 	sel,
@@ -53,10 +55,19 @@ const FormTabs = ({
 		</>
 	);
 };
-const PkmnImage = ({ sprites }: { sprites: { [type: string]: string } }) => {
+const PkmnImage = ({
+	sprites,
+	typing,
+	className,
+}: {
+	sprites: { [type: string]: string };
+	className: string;
+	typing: any
+}) => {
 	const [shiny, setShiny] = useState(false);
 	return (
-		<div className="relative top-0 z-0 h-32 m-auto w-36">
+		<>
+		<div className={`relative top-0 m-auto ${className}`}>
 			<HiSparkles
 				className={`absolute right-1 select-none hover:cursor-pointer ${
 					shiny
@@ -65,15 +76,63 @@ const PkmnImage = ({ sprites }: { sprites: { [type: string]: string } }) => {
 				}`}
 				onClick={() => setShiny(!shiny)}
 			/>
-
 			<img
 				src={
 					(shiny ? sprites.front_shiny : sprites.front_default) ||
 					'/decamark.png'
 				}
-				className="m-auto mb-12 h-36 w-36"
-				alt="Image not Found"
+				className={`m-auto mb-12 ${className}`}
+				alt="Pokemon Sprite"
 			/>
+		</div>
+		<div className='top-0 flex justify-center w-full'>
+		{typing.map((item:any,index:number)=>(
+			<div key={index} className={`w-1/2 text-center border rounded-full font-pkmn text-xs ${TYPE_STYLES[item.type.name]}`}>
+			{capitalize(item.type.name)}
+			</div>
+		))}
+	</div>
+	</>
+	);
+};
+const PkmnForms = ({ formsArray }: any) => {
+	var { error, isLoading, data } = useQuery(['FormsGetter'], () =>
+		getPkmnForms(formsArray)
+	);
+	useEffect(() => {
+		isLoading = true;
+	}, [formsArray]);
+	var content;
+	if (isLoading) content = <Spinner key={0} />;
+	else if (error)
+		content = <p className="text-red-600"> Oops! An error occurred! </p>;
+	else if (data.length <= 1) return <></>;
+	else
+		content = (
+			<>
+				<h4 className="top-0 w-full space-x-0 font-bold leading-none text-center underline bold">
+					{' '}
+					Alternate Forms{' '}
+				</h4>
+				{data.map((form: any, index: number) => (
+					<div key={index}>
+						<PkmnImage
+							className="w-20 h-20"
+							typing={form.types}
+							sprites={form.sprites}
+						/>
+						<h3 className="text-center">
+							{' '}
+							{capitalize(form.form_name)}{' '}
+						</h3>
+					</div>
+				))}
+			</>
+		);
+
+	return (
+		<div className="relative flex flex-wrap justify-around p-1 m-auto mt-1 border border-black rounded-3xl bg-stone-100">
+			{content}
 		</div>
 	);
 };
@@ -125,4 +184,27 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 	);
 };
 
-export default { FormTabs, PkmnImage, Stats, FlavorText };
+export default { VariantTabs, PkmnImage, PkmnForms, Stats, FlavorText };
+
+const TYPE_STYLES = {
+	normal:'bg-neutral-200 border-neutral-400',
+	fire:'border-red-800 bg-red-600',
+	water:'border-cyan-800 bg-cyan-600',
+	grass:'bg-green-500 border-green-700',
+	bug:'bg-lime-300 border-lime-600',
+	dark:'bg-gray-600 border-black text-white ',
+	dragon:'bg-fuchsia-700 border-fuchsia-900',
+	electric:'bg-yellow-300 border-yellow-400',
+	fighting:'bg-amber-700 border-amber-900',
+	flying:'bg-sky-100 border-sky-400',
+	ghost:'bg-purple-400 border-indigo-800',
+	ground:'bg-yellow-700 bg-amber-800',
+	ice:'bg-cyan-100 border-cyan-400',
+	poison:'bg-purple-600 border-violet-700',
+	psychic:'border-pink-700 bg-pink-300',
+	rock:'bg-orange-900 border-stone-900',
+	steel:'bg-stone-200 border-zinc-400',
+	unknown:'',
+	fairy:'bg-pink-200 border-rose-400'
+
+}
