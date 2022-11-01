@@ -87,7 +87,7 @@ const PkmnImage = ({
 		</div>
 		<div className='top-0 flex justify-center w-full'>
 		{typing.map((item:any,index:number)=>(
-			<div key={index} className={`w-1/2 text-center border rounded-full font-pkmn text-xs ${TYPE_STYLES[item.type.name]}`}>
+			<div key={index} className={`w-1/2 text-center border rounded-full font-pkmn text-xs ${TYPE_STYLES[item.type.name]} `}>
 			{capitalize(item.type.name)}
 			</div>
 		))}
@@ -186,7 +186,7 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 
 export default { VariantTabs, PkmnImage, PkmnForms, Stats, FlavorText };
 
-const TYPE_STYLES = {
+const TYPE_STYLES:{[type:string]:string} = {
 	normal:'bg-neutral-200 border-neutral-400',
 	fire:'border-red-800 bg-red-600',
 	water:'border-cyan-800 bg-cyan-600',
