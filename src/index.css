@@ -13,6 +13,6 @@
         @apply h-screen w-screen
     }
     #root{
-        @apply bg-gradient-to-b from-blue-400 to-blue-900 h-screen w-screen
+        @apply bg-gradient-to-b from-blue-400 to-blue-900 h-screen w-screen overflow-auto
     }
 }

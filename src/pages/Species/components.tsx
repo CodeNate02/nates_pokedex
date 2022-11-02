@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { HiSparkles } from 'react-icons/hi2';
 import { useQuery } from 'react-query';
+import TypeIcons from '../../components/TypeIcons';
 import { getPkmnForms, Spinner } from '../../db';
 import { capitalize } from '../../utils';
 
@@ -38,8 +38,10 @@ const VariantTabs = ({
 					{forms.map((_item, index) => (
 						<li
 							key={index}
-							className={`rounded-t-xl bg-stone-100 px-2 border-black border-t-2 border-b border-x-2 relative hover:cursor-pointer ${
-								sel == index ? '-bottom-[2px] shadow-lg' : ''
+							className={`rounded-t-xl  px-2 border-black border-t-2 border-b border-x-2 relative hover:cursor-pointer ${
+								sel == index
+									? '-bottom-[2px] shadow-lg bg-sky-200 even:bg-sky-100'
+									: 'bg-stone-100 even:bg-stone-300'
 							}`}
 							onClick={() => setSel(index)}
 							style={{
@@ -59,44 +61,68 @@ const PkmnImage = ({
 	sprites,
 	typing,
 	className,
+	shiny,
 }: {
-	sprites: { [type: string]: string };
+	sprites: any;
 	className: string;
-	typing: any
+	typing: any;
+	shiny: boolean;
 }) => {
-	const [shiny, setShiny] = useState(false);
+	/*Utilize the most optimal sprite resource available for each form.
+	-If the Pokemon has a home sprite available, use that.
+	-If it doesn't, try the default sprites.  (Some forms, Pikachu speficially)
+	*/
+	var sprite =
+			sprites?.other?.home?.front_default || //Use Home artwork by default
+			sprites.front_default || // Check if there's a default fornt sprite (Some older forms, Pikachu/Pichu)
+			sprites?.other?.['official-artwork'].front_default || //See if the sprite has official artwork (Hisui Forms)
+			'/decamark.png', /*Otherwise, display a Decamark */
+		femaleSprite =
+			sprites?.other?.home?.front_female || sprites.front_female || null, //Female Sprites should only be shown for those with a female sprite in the DB (Meaning this pokemon has a gender difference)
+		shinySprite =
+			sprites?.other?.home?.front_shiny ||
+			sprites.front_shiny ||
+			'/missingno.png', //Ĭ̴̫̬̺̫̻̤̣͝f̴̫͇͕̿̂̉̀̒͜ ̷̳̅̀̉̚t̴̳̮̬̖̤̥̾͑̊̍̔h̴̨̤͎̹̜̘̘͐͛͋̆̿e̸̬̹̪̐r̵̮̱̠̯̅̈́̉̋͜ȩ̴͚̤͎͝ ̴̛̙͖̘̋̉̏͝i̵̱͔͕̟͂̀̉̇̑̉͜s̴̢̝̗̬͊̕ ̴̢̧̟͖̩͚̋̎̅̾̒̅͝ͅņ̷̜̦͓̦͚̓̎o̵͓̐ ̵̡̹͈͗̿̀̉̒̀̕š̸̨̤͊͋́̓̔h̴̡̠̾͐̌̾͆i̶͚͔̱̯͈̇̅̏̽́ň̷͖̒̓̂̍͐̚y̴̹̒̆̓ ̴̡̣̬̂̚f̶̺̬̞͓̫̳̫͋̉̃͆̏o̷̦͒͆̊r̶͓̝̠̻̩̗̈́͌m̴̻̤̀̿̊̑̓̌,̷̨̩̘̀̈́̾̿͝͠ ̷̡̩͍̱́̂͜ṯ̷̀̀̀͌ḧ̴̨̬̫̫̠̥͗͜r̵͚̳̜̄̈́o̸͉͇͍͘͜w̸̛̙̾ ̵̟̘̜̩̕Ṁ̸̢̘̘̘̟̳̈́̀̋i̶̧͖̯̩͙͉͆͐s̶̨̛̩̰̲̀̌̂̇͘͜͝ş̶̠̭͍̮͋̿͆͠į̷̲͖͕̖͂̒ͅn̷̠͗͋͆̊̔͘g̴̖͇̼̅̃̈̕͘͜͝͠n̸͖͖̤͍͛͠͝ǫ̴̻̗͈͂͛̊̆̀͠
+		femaleShinySprite =
+			sprites?.other?.home?.front_shiny_female ||
+			sprites.front_shiny_female ||
+			null;
+
 	return (
 		<>
-		<div className={`relative top-0 m-auto ${className}`}>
-			<HiSparkles
-				className={`absolute right-1 select-none hover:cursor-pointer ${
-					shiny
-						? 'text-blue-500 '
-						: 'text-black/10' /*Shiny button intentionally somewhat hard to see, similarly to shiny Pokemon in game being hard to find*/
-				}`}
-				onClick={() => setShiny(!shiny)}
-			/>
-			<img
-				src={
-					(shiny ? sprites.front_shiny : sprites.front_default) ||
-					'/decamark.png'
-				}
-				className={`m-auto mb-12 ${className}`}
-				alt="Pokemon Sprite"
-			/>
-		</div>
-		<div className='top-0 flex justify-center w-full'>
-		{typing.map((item:any,index:number)=>(
-			<div key={index} className={`w-1/2 text-center border rounded-full font-pkmn text-xs ${TYPE_STYLES[item.type.name]} `}>
-			{capitalize(item.type.name)}
-			</div>
-		))}
-	</div>
-	</>
+			<section className="flex" id="sprites">
+				<div
+					className={`relative top-0 m-auto ${className}`}
+					id="baseSprite"
+				>
+					<img
+						src={(shiny ? shinySprite : sprite) || '/decamark.png'}
+						className={`m-auto mb-12 ${className}`}
+						alt="Pokemon Sprite"
+					/>
+				</div>
+				{femaleSprite && (
+					<div
+						className={`relative top-0 m-auto ${className}`}
+						id="femaleSprite"
+					>
+						<img
+							src={
+								(shiny ? femaleShinySprite : femaleSprite) ||
+								'/decamark.png'
+							}
+							className={`m-auto mb-12 ${className}`}
+							alt="Pokemon Sprite"
+						/>
+					</div>
+				)}
+			</section>
+			<TypeIcons typing={typing} />
+		</>
 	);
 };
-const PkmnForms = ({ formsArray }: any) => {
-	var { error, isLoading, data } = useQuery(['FormsGetter'], () =>
+const PkmnForms = ({ formsArray, shiny }: any) => {
+	var { error, isLoading, data } = useQuery([formsArray], () =>
 		getPkmnForms(formsArray)
 	);
 	useEffect(() => {
@@ -110,35 +136,65 @@ const PkmnForms = ({ formsArray }: any) => {
 	else
 		content = (
 			<>
-				<h4 className="top-0 w-full space-x-0 font-bold leading-none text-center underline bold">
-					{' '}
-					Alternate Forms{' '}
-				</h4>
 				{data.map((form: any, index: number) => (
 					<div key={index}>
+						<h3 className="text-center">
+							{' '}
+							{capitalize(form.form_name || 'base')}{' '}
+						</h3>
 						<PkmnImage
 							className="w-20 h-20"
 							typing={form.types}
 							sprites={form.sprites}
+							shiny={shiny}
 						/>
-						<h3 className="text-center">
-							{' '}
-							{capitalize(form.form_name)}{' '}
-						</h3>
 					</div>
 				))}
 			</>
 		);
 
 	return (
-		<div className="relative flex flex-wrap justify-around p-1 m-auto mt-1 border border-black rounded-3xl bg-stone-100">
+		<div className="relative flex flex-wrap justify-around p-1 m-auto mt-1 border border-black w-fit gap-x-2 rounded-3xl bg-stone-100">
+			<h4 className="top-0 w-full space-x-0 font-bold leading-none text-center underline bold">
+				{' '}
+				Alternate Forms{' '}
+			</h4>
 			{content}
 		</div>
 	);
 };
 
 const Stats = ({ pkmnStats }: any) => {
-	return <div className="border border-red-700 w-36 h-36"></div>;
+	return (
+		<div className="border-black bg-stone-50 rounded-xl border-2 grid grid-cols-[5em_1fr] grid-rows-6 min-w-[15em] p-1 mx-8 md:absolute left-[100%] top-1 h-full gap-y-1 [grid-auto-flow:column]">
+			{pkmnStats.map((item: any, index: number) => (
+				<p
+					className="col-span-1 m-auto text-sm text-center align-middle"
+					key={index}
+				>
+					{' '}
+					{capitalize(item.stat.name.replace('-', ' '))}{' '}
+				</p>
+			))}
+			{pkmnStats.map((item: any, index: number) => (
+				<div
+					key={index}
+					className="w-full m-auto border-r border-black/10 border-y h-fit bg-black/20"
+				>
+					<p
+						className="text-xs text-center"
+						style={{
+							width: item.base_stat / 2.55 + '%',
+							backgroundColor: 'red',
+						}}
+					>
+						{' '}
+						{item.base_stat}{' '}
+					</p>
+				</div>
+			))}
+		</div>
+	);
 };
 
 const FlavorText = ({ pkmn }: { pkmn: any }) => {
@@ -153,7 +209,7 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 	return (
 		<section
 			id="FlavorText"
-			className="grid grid-cols-[3em_30em_3em] bg-white rounded-2xl w-fit m-auto mt-2 h-36"
+			className="grid grid-cols-[3em_minmax(auto,30em)_3em] bg-white rounded-2xl w-fit m-auto mt-2 h-36"
 		>
 			<button
 				onClick={() => {
@@ -185,26 +241,3 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 };
 
 export default { VariantTabs, PkmnImage, PkmnForms, Stats, FlavorText };
-
-const TYPE_STYLES:{[type:string]:string} = {
-	normal:'bg-neutral-200 border-neutral-400',
-	fire:'border-red-800 bg-red-600',
-	water:'border-cyan-800 bg-cyan-600',
-	grass:'bg-green-500 border-green-700',
-	bug:'bg-lime-300 border-lime-600',
-	dark:'bg-gray-600 border-black text-white ',
-	dragon:'bg-fuchsia-700 border-fuchsia-900',
-	electric:'bg-yellow-300 border-yellow-400',
-	fighting:'bg-amber-700 border-amber-900',
-	flying:'bg-sky-100 border-sky-400',
-	ghost:'bg-purple-400 border-indigo-800',
-	ground:'bg-yellow-700 bg-amber-800',
-	ice:'bg-cyan-100 border-cyan-400',
-	poison:'bg-purple-600 border-violet-700',
-	psychic:'border-pink-700 bg-pink-300',
-	rock:'bg-orange-900 border-stone-900',
-	steel:'bg-stone-200 border-zinc-400',
-	unknown:'',
-	fairy:'bg-pink-200 border-rose-400'
-
-}

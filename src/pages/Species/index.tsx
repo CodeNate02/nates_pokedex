@@ -6,6 +6,7 @@ import { Link, Navigate } from 'react-router-dom';
 import searchDB, { getPkmnVariants, Spinner } from '../../db';
 import Searchbar from '../../components/Searchbar';
 import { capitalize } from '../../utils';
+import { HiSparkles } from 'react-icons/hi2';
 import _ from './components';
 
 const Species = () => {
@@ -66,6 +67,7 @@ const Species = () => {
 export default Species;
 
 const PkmnInfo = ({ s }: { s: any }) => {
+	const [shiny, setShiny] = useState(false);
 	const [forms, setForms] = useState<any[] | 'loading' | undefined>(
 		'loading'
 	);
@@ -81,16 +83,29 @@ const PkmnInfo = ({ s }: { s: any }) => {
 			return <Navigate to="/" />;
 	}
 	return (
-		<div className="m-auto w-fit h-fit">
-			<div className="m-auto w-fit">
+		<>
+			<div className="mx-auto mt-5 w-fit">
 				<_.VariantTabs forms={forms} sel={selected} setSel={select} />
 				<div className="relative w-full border-t-8 border-slate-900 rounded-xl w-min-36">
-					<div className="m-auto border-8 border-t-0 border-black border-double rounded-b-xl w-fit bg-stone-100">
-						<_.PkmnImage
-							sprites={forms[selected].sprites}
-							typing = {forms[selected].types}
-							className={' z-0 h-32 w-36'}
+					<div className="relative m-auto border-8 border-t-0 border-black border-double rounded-b-xl w-fit bg-stone-100">
+						<HiSparkles
+							className={`absolute right-1 select-none hover:cursor-pointer z-50 ${
+								shiny
+									? 'text-blue-500 '
+									: 'text-black/10' /*Shiny button intentionally somewhat hard to see, similarly to shiny Pokemon in game being hard to find*/
+							}`}
+							onClick={() => setShiny(!shiny)}
 						/>
+						<_.PkmnImage
+							{...{
+								shiny,
+								setShiny,
+								typing: forms[selected].types,
+								sprites: forms[selected].sprites,
+								className: ' z-0 h-36 w-36',
+							}}
+						/>
+						<_.Stats pkmnStats={forms[selected].stats} />
 						<span className="bottom-0 z-30 w-full leading-none text-center font-pkmn">
 							<h1 className="text-2xl underline">
 								{
@@ -110,10 +125,16 @@ const PkmnInfo = ({ s }: { s: any }) => {
 					</div>
 				</div>
 			</div>
+
 			<_.FlavorText pkmn={s} />
-			{forms[selected].forms.length > 1 && (
-				<_.PkmnForms formsArray={forms[selected].forms} />
-			) /*Load and display alternate forms if the Pokemon has them*/}
-		</div>
+			{
+				forms[selected].forms.length > 1 && (
+					<_.PkmnForms
+						formsArray={forms[selected].forms}
+						shiny={shiny}
+					/>
+				) /*Load and display alternate forms if the Pokemon has them*/
+			}
+		</>
 	);
 };
