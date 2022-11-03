@@ -47,7 +47,7 @@ const Searchbar = ({
 		);
 	}
 	return (
-		<div className="flex m-auto overflow-hidden font-medium border-2 border-black rounded-xl w-80">
+		<div className="flex overflow-hidden font-medium border-2 border-black rounded-xl w-80">
 			<input
 				type="text"
 				className="p-1 grow"

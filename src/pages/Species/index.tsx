@@ -18,17 +18,13 @@ const PokemonSpecies = () => {
 		),
 		[selected, select] = useState(0),
 		[shiny, setShiny] = useState(false);
-
-	useEffect(()=>{
-		select(0);
-	},[data])
 	var page: { [key: string]: JSX.Element | null } = {
 		upper: null,
 		paper: null,
 	};
 	if (error) return <Navigate to="/" />;
 	if (isLoading || !data) page.upper = <Spinner />;
-	else
+	if (data)
 		page = {
 			upper: (
 				<>
@@ -107,19 +103,28 @@ const PokemonSpecies = () => {
 	document.title = `${capitalize(
 		data?.species.name || info
 	)} - Nate's Pokédex`;
+
 	return (
 		<>
-			<header className="static flex content-center w-full bg-stone-900/50 flex-wrap">
-				<Link to='/' className='w-full text-2xl font-pressStart text-center hover:underline'>Nate's Pokedex</Link>
+			<header className="static flex flex-wrap items-center justify-center w-full p-2 bg-stone-900/50">
+				<Link
+					to="/"
+					className="w-full text-2xl text-center font-pressStart hover:underline"
+				>
+					Nate's Pokedex
+				</Link>
 				{data?.species && (
 					<Link to={`/species/${data.species.id - 1}`}>
-						<ArrowButton />
+						<ArrowButton onClick={() => select(0)} />
 					</Link>
 				)}
 				<Searchbar placeHolder="Find Another" />
 				{data?.species && (
 					<Link to={`/species/${data.species.id + 1}`}>
-						<ArrowButton className="rotate-180" />
+						<ArrowButton
+							className="rotate-180"
+							onClick={() => select(0)}
+						/>
 					</Link>
 				)}
 			</header>
