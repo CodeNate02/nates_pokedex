@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from 'react-query';
+import { ArrowButton } from '../../components/ArrowButton';
 import TypeIcons from '../../components/TypeIcons';
 import { getPkmnForms, Spinner } from '../../db';
 import { capitalize } from '../../utils';
@@ -76,7 +77,7 @@ const PkmnImage = ({
 			sprites?.other?.home?.front_default || //Use Home artwork by default
 			sprites.front_default || // Check if there's a default fornt sprite (Some older forms, Pikachu/Pichu)
 			sprites?.other?.['official-artwork'].front_default || //See if the sprite has official artwork (Hisui Forms)
-			'/decamark.png', /*Otherwise, display a Decamark */
+			'/decamark.png' /*Otherwise, display a Decamark */,
 		femaleSprite =
 			sprites?.other?.home?.front_female || sprites.front_female || null, //Female Sprites should only be shown for those with a female sprite in the DB (Meaning this pokemon has a gender difference)
 		shinySprite =
@@ -154,7 +155,7 @@ const PkmnForms = ({ formsArray, shiny }: any) => {
 		);
 
 	return (
-		<div className="relative flex flex-wrap justify-around p-1 m-auto mt-1 border border-black w-fit gap-x-2 rounded-3xl bg-stone-100">
+		<div className="relative flex flex-wrap justify-around p-1 mx-auto mt-1 border border-black w-fit gap-x-2 rounded-3xl bg-stone-100">
 			<h4 className="top-0 w-full space-x-0 font-bold leading-none text-center underline bold">
 				{' '}
 				Alternate Forms{' '}
@@ -169,7 +170,7 @@ const Stats = ({ pkmnStats }: any) => {
 		<div className="border-black bg-stone-50 rounded-xl border-2 grid grid-cols-[5em_1fr] grid-rows-6 min-w-[15em] p-1 mx-8 md:absolute left-[100%] top-1 h-full gap-y-1 [grid-auto-flow:column]">
 			{pkmnStats.map((item: any, index: number) => (
 				<p
-					className="col-span-1 m-auto text-sm text-center align-middle"
+					className="col-span-1 m-auto text-center align-middle text-2xs"
 					key={index}
 				>
 					{' '}
@@ -182,7 +183,7 @@ const Stats = ({ pkmnStats }: any) => {
 					className="w-full m-auto border-r border-black/10 border-y h-fit bg-black/20"
 				>
 					<p
-						className="text-xs text-center"
+						className="text-xs text-center font-screen"
 						style={{
 							width: item.base_stat / 2.55 + '%',
 							backgroundColor: 'red',
@@ -209,35 +210,71 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 	return (
 		<section
 			id="FlavorText"
-			className="grid grid-cols-[3em_minmax(auto,30em)_3em] bg-white rounded-2xl w-fit m-auto mt-2 h-36"
+			className="grid grid-cols-[3em_minmax(auto,30em)_3em] bg-white rounded-2xl w-fit mx-auto mb-5 h-36"
 		>
-			<button
+			<ArrowButton
 				onClick={() => {
 					if (text > 0) setText(text - 1);
 				}}
-				className="p-1 bg-red-400 border border-black rounded-l-2xl hover:underline"
-			>
-				{'<'}
-			</button>
-			<section className="flex flex-col justify-center px-5 border-black border-y">
+				className="w-5 h-5 my-auto ml-auto"
+			/>
+			<section className="flex flex-col justify-center px-5 border-b border-dashed border-black/30">
 				<p>{FlavorTexts[text].flavor_text}</p>
-				<p className="w-full text-right">
+				<p className="w-full italic text-right">
 					-Pokémon{' '}
 					{capitalize(
 						FlavorTexts[text].version.name.split('-').join(' ')
 					)}
 				</p>
 			</section>
-			<button
+			<ArrowButton
 				onClick={() => {
 					if (text < FlavorTexts.length - 1) setText(text + 1);
 				}}
-				className="p-1 bg-gray-200 border border-black rounded-r-2xl hover:underline"
-			>
-				{'>'}
-			</button>
+				className="w-5 h-5 my-auto mr-auto rotate-180"
+			/>
 		</section>
 	);
 };
+/* Dex Numbers lists a bold heading of the Pkmn's canonical National Dex number, and a list of  */
+const DexNumbers = ({ entries }: any) => {
+	const e = useMemo(() => {
+		let r: { national: any; dex: any } = {
+			national: undefined,
+			dex: [] as any[],
+		};
+		entries.forEach((e: any) => {
+			if (e.pokedex.name == 'national') r.national = e;
+			else r.dex.push(e);
+		});
+		return r;
+	}, [entries]);
+	return (
+		<div className="absolute right-[115%] top-0 h-full flex">
+			<div className="my-auto p-3 rounded-2xl bg-white border-black border-2 max-h-full flex flex-col overflow-x-visible">
+				<h3 className="text-xl font-screen text-right underline mr-2">
+					{' '}
+					{`#${e?.national?.entry_number || '???'}`}{' '}
+				</h3>
+				<ul className="text-xs whitespace-nowrap text-center overflow-y-auto h-full overflow-x-hidden border p-1 rounded-md shadow-sm">
+					{e.dex.map((item: any, index: number) => (
+						<li key={index}>
+							{`${capitalize(
+								item.pokedex.name.split('-').join(' ')
+							)} #${item.entry_number} `}
+						</li>
+					))}
+				</ul>
+			</div>
+		</div>
+	);
+};
 
-export default { VariantTabs, PkmnImage, PkmnForms, Stats, FlavorText };
+export default {
+	VariantTabs,
+	PkmnImage,
+	PkmnForms,
+	Stats,
+	FlavorText,
+	DexNumbers,
+};

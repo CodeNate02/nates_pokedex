@@ -50,7 +50,7 @@ const Species = () => {
 		case 'ready':
 			return (
 				<>
-					<header className="static flex content-center w-full bg-stone-900/50">
+					<header className="sticky top-0 flex content-center w-full bg-stone-900/50">
 						<Link to={`/species/${species.id - 1}`}>
 							<ArrowButton />
 						</Link>
@@ -84,49 +84,53 @@ const PkmnInfo = ({ s }: { s: any }) => {
 	}
 	return (
 		<>
-			<div className="mx-auto mt-5 w-fit">
+			<div className="mx-auto mt-5 w-fit" id="identify">
 				<_.VariantTabs forms={forms} sel={selected} setSel={select} />
-				<div className="relative w-full border-t-8 border-slate-900 rounded-xl w-min-36">
-					<div className="relative m-auto border-8 border-t-0 border-black border-double rounded-b-xl w-fit bg-stone-100">
-						<HiSparkles
-							className={`absolute right-1 select-none hover:cursor-pointer z-50 ${
-								shiny
-									? 'text-blue-500 '
-									: 'text-black/10' /*Shiny button intentionally somewhat hard to see, similarly to shiny Pokemon in game being hard to find*/
+				<div
+					id="inner-itentify"
+					className="relative w-full m-auto border-8 border-black border-double rounded-xl bg-stone-100"
+				>
+					<HiSparkles
+						className={`absolute right-1 select-none hover:cursor-pointer z-50 ${
+							shiny
+								? 'text-blue-500 '
+								: 'text-black/10' /*Shiny button intentionally somewhat hard to see, similarly to shiny Pokemon in game being hard to find*/
+						}`}
+						onClick={() => setShiny(!shiny)}
+						id="shinySparkles"
+					/>
+					<_.PkmnImage
+						{...{
+							shiny,
+							setShiny,
+							typing: forms[selected].types,
+							sprites: forms[selected].sprites,
+							className: ' z-0 h-36 w-36',
+						}}
+					/>
+					<_.Stats pkmnStats={forms[selected].stats} />
+					<_.DexNumbers entries={s.pokedex_numbers} />
+					<span
+						className="bottom-0 z-30 w-full leading-none text-center font-pkmn"
+						id="nameAndGenus"
+					>
+						<h1 className="text-2xl underline">
+							{
+								s.names.filter(
+									(x: any) => x.language.name == 'en'
+								)[0].name
+							}
+						</h1>
+						<h2 className="max-w-[10em] m-auto pb-2 px-2">
+							{`The ${
+								s?.genera.filter(
+									(x: any) => x.language.name == 'en'
+								)[0]?.genus
 							}`}
-							onClick={() => setShiny(!shiny)}
-						/>
-						<_.PkmnImage
-							{...{
-								shiny,
-								setShiny,
-								typing: forms[selected].types,
-								sprites: forms[selected].sprites,
-								className: ' z-0 h-36 w-36',
-							}}
-						/>
-						<_.Stats pkmnStats={forms[selected].stats} />
-						<span className="bottom-0 z-30 w-full leading-none text-center font-pkmn">
-							<h1 className="text-2xl underline">
-								{
-									s.names.filter(
-										(x: any) => x.language.name == 'en'
-									)[0].name
-								}
-							</h1>
-							<h2 className="max-w-[10em] m-auto pb-2 px-2">
-								{`The ${
-									s?.genera.filter(
-										(x: any) => x.language.name == 'en'
-									)[0]?.genus
-								}`}
-							</h2>
-						</span>
-					</div>
+						</h2>
+					</span>
 				</div>
 			</div>
-
-			<_.FlavorText pkmn={s} />
 			{
 				forms[selected].forms.length > 1 && (
 					<_.PkmnForms
@@ -135,6 +139,12 @@ const PkmnInfo = ({ s }: { s: any }) => {
 					/>
 				) /*Load and display alternate forms if the Pokemon has them*/
 			}
+			<div
+				id="paper"
+				className="mx-5 mt-10 rounded-t-lg bg-stone-100 grow drop-shadow"
+			>
+				<_.FlavorText pkmn={s} />
+			</div>
 		</>
 	);
 };
