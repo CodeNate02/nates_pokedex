@@ -201,20 +201,23 @@ const Stats = ({ pkmnStats }: any) => {
 const FlavorText = ({ pkmn }: { pkmn: any }) => {
 	const flavorText = useRef<HTMLElement>(null);
 	const [text, setText] = useState(0);
-	const FlavorTexts = useMemo(
-		() =>
-			pkmn.flavor_text_entries.filter(
-				(x: any) => x.language.name == 'en'
-			),
-		[pkmn]
-	);
+	useEffect(() => {
+		setText(0);
+	}, [pkmn]);
+	const FlavorTexts = useMemo(() => {
+		setText(0);
+		return pkmn.flavor_text_entries.filter(
+			(x: any) => x.language.name == 'en'
+		);
+	}, [pkmn]);
 
 	const transitionText = (n: number) => {
 		let newText = text + n;
-		
-		if (newText < 0) newText = FlavorTexts.length - 1;  //Loop around dex entry
+		if (newText < 0)
+			newText = FlavorTexts.length - 1; //Loop around dex entry
 		else if (newText >= FlavorTexts.length) newText = 0;
-		if (newText != text) { //testing testing 123
+		if (newText != text) {
+			//testing testing 123
 			flavorText.current && (flavorText.current.style.opacity = '0');
 			setTimeout(() => {
 				setText(newText);
@@ -236,10 +239,10 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 				ref={flavorText}
 				className="flex flex-col justify-center px-5 border-b border-dashed border-black/30 transition-opacity"
 			>
-				<p>{FlavorTexts[text].flavor_text}</p>
+				<p>{FlavorTexts[text]?.flavor_text || 'error'}</p>
 				<p className="w-full italic text-right">
 					-Pokémon{' '}
-					{capitalize(
+					{FlavorTexts[text]?.version?.name && capitalize(
 						FlavorTexts[text].version.name.split('-').join(' ')
 					)}
 				</p>
