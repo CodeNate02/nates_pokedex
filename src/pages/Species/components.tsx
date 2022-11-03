@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useQuery } from 'react-query';
 import { ArrowButton } from '../../components/ArrowButton';
 import TypeIcons from '../../components/TypeIcons';
@@ -199,6 +199,7 @@ const Stats = ({ pkmnStats }: any) => {
 };
 
 const FlavorText = ({ pkmn }: { pkmn: any }) => {
+	const flavorText = useRef<HTMLElement>(null);
 	const [text, setText] = useState(0);
 	const FlavorTexts = useMemo(
 		() =>
@@ -207,18 +208,34 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 			),
 		[pkmn]
 	);
+
+	const transitionText = (n: number) => {
+		let newText = text + n;
+		
+		if (newText < 0) newText = FlavorTexts.length - 1;  //Loop around dex entry
+		else if (newText >= FlavorTexts.length) newText = 0;
+		if (newText != text) { //testing testing 123
+			flavorText.current && (flavorText.current.style.opacity = '0');
+			setTimeout(() => {
+				setText(newText);
+				flavorText.current && (flavorText.current.style.opacity = '1');
+			}, 100);
+		}
+	};
+
 	return (
 		<section
 			id="FlavorText"
 			className="grid grid-cols-[3em_minmax(auto,30em)_3em] bg-white rounded-2xl w-fit mx-auto mb-5 h-36"
 		>
 			<ArrowButton
-				onClick={() => {
-					if (text > 0) setText(text - 1);
-				}}
+				onClick={() => transitionText(-1)}
 				className="w-5 h-5 my-auto ml-auto"
 			/>
-			<section className="flex flex-col justify-center px-5 border-b border-dashed border-black/30">
+			<section
+				ref={flavorText}
+				className="flex flex-col justify-center px-5 border-b border-dashed border-black/30 transition-opacity"
+			>
 				<p>{FlavorTexts[text].flavor_text}</p>
 				<p className="w-full italic text-right">
 					-Pokémon{' '}
@@ -228,9 +245,7 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 				</p>
 			</section>
 			<ArrowButton
-				onClick={() => {
-					if (text < FlavorTexts.length - 1) setText(text + 1);
-				}}
+				onClick={() => transitionText(1)}
 				className="w-5 h-5 my-auto mr-auto rotate-180"
 			/>
 		</section>
