@@ -1,8 +1,7 @@
 import { useRef } from 'react';
 import { useQuery } from 'react-query';
-import { useDispatch, setState } from '../redux';
 import { useNavigate } from 'react-router';
-import searchDB from '../db';
+import searchDB, { getFromDB } from '../db';
 import { capitalize } from '../utils';
 
 const Searchbar = ({
@@ -14,25 +13,20 @@ const Searchbar = ({
 	routeTo?: string;
 	placeHolder?: string;
 }) => {
-	const dispatch = useDispatch(),
-		navigate = useNavigate(),
+	const navigate = useNavigate(),
 		ref = useRef<HTMLInputElement>(null);
-	const { isLoading, error, data } = useQuery(['repoData'], () =>
+	const { isLoading, error, data } = useQuery([], () =>
 		//Query data
-		fetch(`https://pokeapi.co/api/v2/${searchType}?limit=100000`).then(
-			res => res.json()
-		)
+		getFromDB(`https://pokeapi.co/api/v2/${searchType}?limit=100000`)
 	);
 	const search = async (term: string) => {
 		if (term.length < 1) return {};
 		searchDB(searchType, term).then(data => {
 			if (data) {
-				dispatch(setState(data, 'data')); //Store data from the search in the Redux store
 				navigate(`/${routeTo}/${term}`);
 			}
 		});
 	};
-
 	var list;
 	if (isLoading || error) {
 		//List is empty if query is still in progress, failed
@@ -42,7 +36,14 @@ const Searchbar = ({
 			(
 				item: any,
 				index: number //populate list with value names
-			) => <option key={index} value={capitalize(item.name.split('-').join(' ')).split(' ').join('-')}/>
+			) => (
+				<option
+					key={index}
+					value={capitalize(item.name.split('-').join(' '))
+						.split(' ')
+						.join('-')}
+				/>
+			)
 		);
 	}
 	return (

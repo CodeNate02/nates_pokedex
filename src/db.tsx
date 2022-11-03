@@ -1,39 +1,60 @@
-const searchDB = async (searchType: string, term: string) => {
-	let result = await fetch(
-		`https://pokeapi.co/api/v2/${searchType}/${term.toLowerCase()}`
-	);
-	if (result.ok) {
-		return await result.json();
+/*
+	Get From DB
+	Checks if localstorage contains the information, otherwise gets the information fron the server, stores it, and presents it
+*/
+export const getFromDB = async (link: string) => {
+	let local;
+	try {
+		local = localStorage.getItem(link.slice(26));
+	} catch {
+		local = undefined;
+	}
+
+	if (local) return JSON.parse(local);
+	else {
+		let data: any = await fetch(link).then(async x => {
+			if (x.ok) return await x.json();
+		});
+		try {
+			localStorage.setItem(link.slice(26), JSON.stringify(data));
+		} catch {}
+
+		return data;
 	}
 };
 
-export const getPkmnVariants = async (v: any[]) => {
+const searchDB = async (searchType: string, term: string) => {
+	let result = await getFromDB(
+		`https://pokeapi.co/api/v2/${searchType}/${term.toLowerCase()}`
+	);
+	return result;
+};
+
+const getPkmnVariants = async (v: any[]) => {
 	if (v[0].pokemon.name == 'pikachu') return await getPikachuVariants(v);
 	let rv = [] as any;
-	for (let i = 0; i < v.length; i++) {
-		let response = await fetch(v[i].pokemon.url);
-		let data = await response.json();
-		rv.push({ ...data });
-	}
-	return rv;
+	v.forEach((vari: any) => rv.push(getFromDB(vari.pokemon.url)));
+	return await Promise.all(rv);
 };
-export const getPkmnForms = async (v: any[]) => {
-	if (v[0] == 'CAPS_PIKACHU' || v[0] == 'COSPLAY_PIKACHU') {
-		return v.slice(1);
-	}
+const getPkmnForms = async (v: any[]) => {
+	if (v[0] == 'CAPS_PIKACHU' || v[0] == 'COSPLAY_PIKACHU') return v.slice(1); //Hard-coded Pikachu code variation
 	let rv = [] as any;
-	for (let i = 0; i < v.length; i++) {
-		let response = await fetch(v[i].url);
-		let data = await response.json();
-		rv.push({ ...data });
-	}
-	return rv;
+	v.map(form => rv.push(getFromDB(form.url)));
+	return Promise.all(rv);
 };
-// const COSPLAY_PIKACHU = {
-// 	forms:[
-// 		name:
-// 	]
-// }
+
+export const getSpeciesInfo = async (id: string) => {
+	let species = await getFromDB(
+		`https://pokeapi.co/api/v2/pokemon-species/${id}`
+	);
+	let variants = await getPkmnVariants(species.varieties);
+	let formPromises = [] as any;
+	variants.forEach((item: any) =>
+		formPromises.push(getPkmnForms(item.forms))
+	);
+	let forms = await Promise.all(formPromises);
+	return { species, variants, forms };
+};
 
 /* SET COSPLAY PIKACHU FORMS -
 		The Database hates me and treaats every single Cosplay and Hat pikachu as a separate variant,
@@ -45,7 +66,7 @@ export const getPkmnForms = async (v: any[]) => {
 		getPkmnForms needed to be altered to account for the hard-code, but it shouldn't be too costly.
 
 		The different cosplay/cap forms ARE listed as forms on the forms endpoint, but the databse doesn't accurately reflect this.
-		An alternate method, depending on performance, would be to hard-code the names and endpoints in and re-fetch the information, but since
+		An alternate method, depending on performance, would be to hard-code the names and endpoints in and re-getFromDB the information, but since
 		all the information I needed was already a part of the original query, I decided to reorganize that info and not query redundant information.
 		*/
 const COSPLAYS = [
@@ -71,9 +92,7 @@ const getPikachuVariants = async (pikas: any[]) => {
 		caps = { forms: [] } as any,
 		cosplays = { forms: [] } as any;
 	for (let i = 0; i < pikas.length; i++) {
-		let response = await fetch(pikas[i].pokemon.url);
-		let data = await response.json();
-
+		let data = await getFromDB(pikas[i].pokemon.url);
 		if (COSPLAYS.includes(pikas[i].pokemon.name)) {
 			if (pikas[i].pokemon.name == 'pikachu-cosplay') {
 				cosplays = {
@@ -86,7 +105,10 @@ const getPikachuVariants = async (pikas: any[]) => {
 					forms: [
 						...cosplays.forms,
 						{
-							form_name: (data.name=='pikachu-phd' ? 'phD' : data.name.slice(8)),
+							form_name:
+								data.name == 'pikachu-phd'
+									? 'phD'
+									: data.name.slice(8),
 							types: data.types,
 							sprites: data.sprites,
 						},
@@ -140,3 +162,22 @@ export const Spinner = () => {
 	);
 };
 export default searchDB;
+
+const getChainInfo = async (chainUrl: string) => {
+	const chain = await getFromDB(chainUrl);
+	console.log(chain);
+	return chain;
+};
+getChainInfo('https://pokeapi.co/api/v2/evolution-chain/140');
+getChainInfo('https://pokeapi.co/api/v2/evolution-chain/72');
+getChainInfo('https://pokeapi.co/api/v2/evolution-chain/22');
+type EvChain = {
+	baby_trigger_item: null | { name: string; url: string };
+	chain: EvoChainLink;
+};
+type EvoChainLink = {
+	evolution_datails: any;
+	evolves_to: EvoChainLink[];
+	is_baby: boolean;
+	species: { name: string; url: string };
+};

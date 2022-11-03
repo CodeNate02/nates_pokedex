@@ -1,8 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { useQuery } from 'react-query';
 import { ArrowButton } from '../../components/ArrowButton';
 import TypeIcons from '../../components/TypeIcons';
-import { getPkmnForms, Spinner } from '../../db';
+import { Spinner } from '../../db';
 import { capitalize } from '../../utils';
 
 /* Form Tabs Formats/Creates tabs on top of Pokémon entry to navigate through various forms*/
@@ -123,36 +122,24 @@ const PkmnImage = ({
 	);
 };
 const PkmnForms = ({ formsArray, shiny }: any) => {
-	var { error, isLoading, data } = useQuery([formsArray], () =>
-		getPkmnForms(formsArray)
+	var content = (
+		<>
+			{formsArray.map((form: any, index: number) => (
+				<div key={index}>
+					<h3 className="text-center">
+						{' '}
+						{capitalize(form.form_name || 'base')}{' '}
+					</h3>
+					<PkmnImage
+						className="w-20 h-20"
+						typing={form.types}
+						sprites={form.sprites}
+						shiny={shiny}
+					/>
+				</div>
+			))}
+		</>
 	);
-	useEffect(() => {
-		isLoading = true;
-	}, [formsArray]);
-	var content;
-	if (isLoading) content = <Spinner key={0} />;
-	else if (error)
-		content = <p className="text-red-600"> Oops! An error occurred! </p>;
-	else if (data.length <= 1) return <></>;
-	else
-		content = (
-			<>
-				{data.map((form: any, index: number) => (
-					<div key={index}>
-						<h3 className="text-center">
-							{' '}
-							{capitalize(form.form_name || 'base')}{' '}
-						</h3>
-						<PkmnImage
-							className="w-20 h-20"
-							typing={form.types}
-							sprites={form.sprites}
-							shiny={shiny}
-						/>
-					</div>
-				))}
-			</>
-		);
 
 	return (
 		<div className="relative flex flex-wrap justify-around p-1 mx-auto mt-1 border border-black w-fit gap-x-2 rounded-3xl bg-stone-100">
@@ -167,10 +154,10 @@ const PkmnForms = ({ formsArray, shiny }: any) => {
 
 const Stats = ({ pkmnStats }: any) => {
 	return (
-		<div className="border-black bg-stone-50 rounded-xl border-2 grid grid-cols-[5em_1fr] grid-rows-6 min-w-[15em] p-1 mx-8 md:absolute left-[100%] top-1 h-full gap-y-1 [grid-auto-flow:column]">
+		<div className="border-black bg-stone-50 rounded-xl border-2 grid grid-cols-[5em_1fr] grid-rows-6 min-w-[15em] p-1 mx-8 md:absolute left-[100%] top-1 h-full gap-y-4 [grid-auto-flow:column]">
 			{pkmnStats.map((item: any, index: number) => (
 				<p
-					className="col-span-1 m-auto text-center align-middle text-2xs"
+					className="col-span-1 m-auto text-center align-middle text-xs font-screen"
 					key={index}
 				>
 					{' '}
@@ -229,27 +216,28 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 	return (
 		<section
 			id="FlavorText"
-			className="grid grid-cols-[3em_minmax(auto,30em)_3em] bg-white rounded-2xl w-fit mx-auto mb-5 h-36"
+			className="w-full mb-5 h-36 flex items-center justify-center border-dashed border-b border-black/25"
 		>
 			<ArrowButton
 				onClick={() => transitionText(-1)}
-				className="w-5 h-5 my-auto ml-auto"
+				className="w-5 h-5"
 			/>
 			<section
 				ref={flavorText}
-				className="flex flex-col justify-center px-5 border-b border-dashed border-black/30 transition-opacity"
+				className="px-5 transition-opacity max-w-lg"
 			>
 				<p>{FlavorTexts[text]?.flavor_text || 'error'}</p>
 				<p className="w-full italic text-right">
 					-Pokémon{' '}
-					{FlavorTexts[text]?.version?.name && capitalize(
-						FlavorTexts[text].version.name.split('-').join(' ')
-					)}
+					{FlavorTexts[text]?.version?.name &&
+						capitalize(
+							FlavorTexts[text].version.name.split('-').join(' ')
+						)}
 				</p>
 			</section>
 			<ArrowButton
 				onClick={() => transitionText(1)}
-				className="w-5 h-5 my-auto mr-auto rotate-180"
+				className="w-5 h-5 rotate-180"
 			/>
 		</section>
 	);
@@ -288,6 +276,14 @@ const DexNumbers = ({ entries }: any) => {
 	);
 };
 
+const EvoChain = ({ chain }: any) => {
+	return (
+		<div>
+			<h4>Evolutions </h4>
+		</div>
+	);
+};
+
 export default {
 	VariantTabs,
 	PkmnImage,
@@ -295,4 +291,5 @@ export default {
 	Stats,
 	FlavorText,
 	DexNumbers,
+	EvoChain,
 };
