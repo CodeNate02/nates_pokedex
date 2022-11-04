@@ -162,22 +162,3 @@ export const Spinner = () => {
 	);
 };
 export default searchDB;
-
-const getChainInfo = async (chainUrl: string) => {
-	const chain = await getFromDB(chainUrl);
-	console.log(chain);
-	return chain;
-};
-getChainInfo('https://pokeapi.co/api/v2/evolution-chain/140');
-getChainInfo('https://pokeapi.co/api/v2/evolution-chain/72');
-getChainInfo('https://pokeapi.co/api/v2/evolution-chain/22');
-type EvChain = {
-	baby_trigger_item: null | { name: string; url: string };
-	chain: EvoChainLink;
-};
-type EvoChainLink = {
-	evolution_datails: any;
-	evolves_to: EvoChainLink[];
-	is_baby: boolean;
-	species: { name: string; url: string };
-};

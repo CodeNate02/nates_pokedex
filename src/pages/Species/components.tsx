@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { ArrowButton } from '../../components/ArrowButton';
 import TypeIcons from '../../components/TypeIcons';
-import { Spinner } from '../../db';
+import { getFromDB, Spinner } from '../../db';
 import { capitalize } from '../../utils';
 
 /* Form Tabs Formats/Creates tabs on top of Pokémon entry to navigate through various forms*/
@@ -157,7 +157,7 @@ const Stats = ({ pkmnStats }: any) => {
 		<div className="border-black bg-stone-50 rounded-xl border-2 grid grid-cols-[5em_1fr] grid-rows-6 min-w-[15em] p-1 mx-8 md:absolute left-[100%] top-1 h-full gap-y-4 [grid-auto-flow:column]">
 			{pkmnStats.map((item: any, index: number) => (
 				<p
-					className="col-span-1 m-auto text-center align-middle text-xs font-screen"
+					className="col-span-1 m-auto text-xs text-center align-middle font-screen"
 					key={index}
 				>
 					{' '}
@@ -185,7 +185,7 @@ const Stats = ({ pkmnStats }: any) => {
 	);
 };
 
-const FlavorText = ({ pkmn }: { pkmn: any }) => {
+const FlavorText = ({ pkmn }: any) => {
 	const flavorText = useRef<HTMLElement>(null);
 	const [text, setText] = useState(0);
 	useEffect(() => {
@@ -216,7 +216,7 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 	return (
 		<section
 			id="FlavorText"
-			className="w-full mb-5 h-36 flex items-center justify-center border-dashed border-b border-black/25"
+			className="flex items-center justify-center w-full mb-5 border-b border-dashed h-36 border-black/25"
 		>
 			<ArrowButton
 				onClick={() => transitionText(-1)}
@@ -224,7 +224,7 @@ const FlavorText = ({ pkmn }: { pkmn: any }) => {
 			/>
 			<section
 				ref={flavorText}
-				className="px-5 transition-opacity max-w-lg"
+				className="max-w-lg px-5 transition-opacity"
 			>
 				<p>{FlavorTexts[text]?.flavor_text || 'error'}</p>
 				<p className="w-full italic text-right">
@@ -257,12 +257,12 @@ const DexNumbers = ({ entries }: any) => {
 	}, [entries]);
 	return (
 		<div className="absolute right-[115%] top-0 h-full flex">
-			<div className="my-auto p-3 rounded-2xl bg-white border-black border-2 max-h-full flex flex-col overflow-x-visible">
-				<h3 className="text-xl font-screen text-right underline mr-2">
+			<div className="flex flex-col max-h-full p-3 my-auto overflow-x-visible bg-white border-2 border-black rounded-2xl">
+				<h3 className="mr-2 text-xl text-right underline font-screen">
 					{' '}
 					{`#${e?.national?.entry_number || '???'}`}{' '}
 				</h3>
-				<ul className="text-xs whitespace-nowrap text-center overflow-y-auto h-full overflow-x-hidden border p-1 rounded-md shadow-sm">
+				<ul className="h-full p-1 overflow-x-hidden overflow-y-auto text-xs text-center border rounded-md shadow-sm whitespace-nowrap">
 					{e.dex.map((item: any, index: number) => (
 						<li key={index}>
 							{`${capitalize(
@@ -276,10 +276,191 @@ const DexNumbers = ({ entries }: any) => {
 	);
 };
 
-const EvoChain = ({ chain }: any) => {
+const Abilities = ({ abilities }: any) => {
 	return (
-		<div>
-			<h4>Evolutions </h4>
+		<div className="mx-2 border border-black h-fit">
+			{' '}
+			<h4 className="text-xl font-medium text-center"> Abilities </h4>
+			<ul className="text-lg text-center">
+				{abilities.map((item: any, index: any) => (
+					<li
+						key={index}
+						className="border-t border-black min-h-[4rem] w-28 flex flex-col justify-center"
+					>
+						{capitalize(item.ability.name.split('-').join(' '))}
+						{item.is_hidden ? (
+							<span className="block text-xs font-extralight">
+								Hidden
+							</span>
+						) : undefined}
+					</li>
+				))}
+			</ul>
+		</div>
+	);
+};
+const MoveSet = ({ moves }: any) => {
+	const [formatted, setFormatted] = useState<'loading' | any>('loading');
+	const [selected, setSelected] = useState<string>('sword-shield');
+	const vMoves = () => {
+		return formatted[selected] || [];
+	};
+	useEffect(() => {
+		setFormatted('loading');
+		organizeVersionGroups(moves).then(x => {
+			console.log(x);
+			if (!formatted[selected]) {
+				setSelected(Object.keys(x)[0]);
+			}
+			setFormatted(x);
+		});
+	}, [moves]);
+	return (
+		<div className="h-full mx-20 overflow-y-auto border border-black grow">
+			<h4 className="text-xl font-medium text-center"> Learnset </h4>
+			{(formatted == 'loading' && <Spinner />) || (
+				<>
+					<div className="flex flex-wrap gap-2 p-2 justify-evenly">
+						{Object.keys(formatted).map((item, index) => (
+							<VersionButton
+								key={index}
+								version={item}
+								onClick={() => setSelected(item)}
+								className={
+									selected == item
+										? 'drop-shadow-xl scale-125 '
+										: ''
+								}
+							></VersionButton>
+						))}
+					</div>
+					<div className="flex flex-wrap">
+						{/*LEARNSET TABLE*/}
+						<table className="h-full border-t border-black w-min-1/3 grow">
+							<thead className="border-black border-y">
+								<tr className="w-full">
+									{' '}
+									<td className="font-medium text-center">
+										{' '}
+										Level-Up{' '}
+									</td>
+								</tr>
+								<tr className="grid grid-cols-[2fr_6em_6em_6em_6em]">
+									<td>Name</td>
+									<td>Learned</td>
+									<td>Class</td>
+									<td>Power</td>
+									<td>Accuracy</td>
+								</tr>
+							</thead>
+							<tbody>
+								{vMoves()
+									.filter((x:any) => x.method == 'level-up')
+									.sort((x:any, y:any) => x.level - y.level)
+									.map((item: any, index: number) => (
+										<tr
+											key={index}
+											className="odd:bg-black/10 grid grid-cols-[2fr_6em_6em_6em_6em]"
+										>
+											<td className="odd:bg-blue-800/10">
+												{capitalize(
+													item.name
+														.split('-')
+														.join(' ')
+												)}
+											</td>
+											<td>
+												{item.method == 'level-up'
+													? `Level ${item.level}`
+													: item.method == 'machine'
+													? 'TM'
+													: item.method == 'tutor'
+													? 'Move Tutor'
+													: capitalize(item.method)}
+											</td>
+										</tr>
+									))}
+							</tbody>
+						</table>
+						<table className="h-full border-t border-black border-x border-x-black/20 w-min-1/3 grow">
+							<thead className="border-black border-y">
+								<tr className="w-full">
+									{' '}
+									<td className="font-medium text-center">
+										Machine
+									</td>
+								</tr>
+								<tr className="grid grid-cols-[2fr_6em_6em_6em_6em]">
+									<td>Name</td>
+									<td>Class</td>
+									<td>Power</td>
+									<td>Accuracy</td>
+								</tr>
+							</thead>
+							<tbody>
+								{vMoves()
+									.filter((x:any) => x.method == 'machine')
+									.map((item: any, index: number) => (
+										<tr
+											key={index}
+											className="odd:bg-black/10 grid grid-cols-[2fr_6em_6em_6em_6em]"
+										>
+											<td className="odd:bg-blue-800/10">
+												{capitalize(
+													item.name
+														.split('-')
+														.join(' ')
+												)}
+											</td>
+										</tr>
+									))}
+							</tbody>
+						</table>
+						<table className="h-full border-t border-black w-min-1/3 grow">
+							<thead className="border-black border-y">
+								<tr className="w-full">
+									{' '}
+									<td className="font-medium text-center">
+										{' '}
+										Move Tutor{' '}
+									</td>
+								</tr>
+								<tr className="grid grid-cols-[2fr_6em_6em_6em]">
+									<td>Name</td>
+									<td>Class</td>
+									<td>Power</td>
+									<td>Accuracy</td>
+								</tr>
+							</thead>
+							<tbody>
+								{vMoves()
+									.filter((x:any) => x.method == 'tutor')
+									.map((item: any, index: number) => (
+										<tr
+											key={index}
+											className="odd:bg-black/10 grid grid-cols-[2fr_6em_6em_6em]"
+										>
+											<td className="odd:bg-blue-800/10">
+												{capitalize(
+													item.name
+														.split('-')
+														.join(' ')
+												)}
+											</td>
+										</tr>
+									))}
+							</tbody>
+						</table>
+					</div>
+
+					{vMoves().length < 1 && (
+						<p className="w-full text-center text-red-700 bg-gray-800/20">
+							{' '}
+							No Moves Found{' '}
+						</p>
+					)}
+				</>
+			)}
 		</div>
 	);
 };
@@ -291,5 +472,199 @@ export default {
 	Stats,
 	FlavorText,
 	DexNumbers,
-	EvoChain,
+	Abilities,
+	MoveSet,
+};
+
+const organizeVersionGroups = async (moves: any[]) => {
+	let organized: any = {};
+	for (let i = 0; i < moves.length; i++) {
+		let moveName = moves[i].move.name;
+		let moveData = await getFromDB(
+			`https://pokeapi.co/api/v2/move/${moveName}`
+		);
+		moves[i].version_group_details.forEach((vg: any) => {
+			let info = {
+				name: moveName,
+				method: vg.move_learn_method.name,
+				level: vg.level_learned_at,
+				class: moveData.damage_class.name,
+				acc: moveData.accuracy,
+				power: moveData.power,
+			};
+			if (organized?.[vg.version_group.name])
+				organized[vg.version_group.name].push(info);
+			else organized[vg.version_group.name] = [info];
+		});
+	}
+	return organized;
+};
+
+const VersionButton = ({ version, className, onClick }: any) => {
+	/* Great Big Button Switch.  Style "Version Buttons" depending on the version string.  Default to a simple white button on the end for any not in the switch */
+	let buttonInfo: {
+		buttonClasses: string;
+		label: string;
+		textClasses?: string;
+	};
+	switch (version) {
+		case 'red-blue':
+			buttonInfo = {
+				buttonClasses:
+					'[background:linear-gradient(90deg,#A81F02_50%,#215B8C_50%)] order-1',
+				label: 'RB',
+			};
+			break;
+		case 'yellow':
+			buttonInfo = {
+				buttonClasses: 'bg-[#FECC34] order-2',
+				label: 'Yellow',
+			};
+			break;
+		case 'gold-silver':
+			buttonInfo = {
+				buttonClasses:
+					'[background:linear-gradient(90deg,#E2B624_50%,#C5D1CF_50%)] order-3',
+				label: 'GS',
+			};
+			break;
+		case 'crystal':
+			buttonInfo = {
+				buttonClasses: 'order-4 bg-[#8798CB]',
+				label: 'Crystal',
+			};
+			break;
+		case 'ruby-sapphire':
+			buttonInfo = {
+				buttonClasses:
+					'[background:linear-gradient(90deg,#A81F02_50%,#215B8C_50%)] order-5',
+				label: 'RS',
+			};
+			break;
+		case 'emerald':
+			buttonInfo = {
+				buttonClasses: 'bg-[#01A956] order-6',
+				label: 'Emerald',
+			};
+			break;
+		case 'firered-leafgreen':
+			buttonInfo = {
+				buttonClasses:
+					'[background:linear-gradient(90deg,#DB3A11_50%,#3DB53D_50%)] order-7',
+				label: 'FRLG',
+			};
+			break;
+		case 'colosseum': {
+			buttonInfo = {
+				buttonClasses: 'order-8 bg-[#EC1B24]',
+				label: 'Colosseum',
+			};
+			break;
+		}
+		case 'xd':
+			buttonInfo = {
+				buttonClasses: 'order-9 bg-[#AE464E]',
+				label: 'XD',
+			};
+			break;
+		case 'diamond-pearl':
+			buttonInfo = {
+				buttonClasses:
+					'order-10 [background:linear-gradient(90deg,#4CA4B6_50%,#B0758F_50%)]',
+				label: 'DP',
+			};
+			break;
+		case 'platinum':
+			buttonInfo = {
+				buttonClasses: 'order-11 bg-[#76597B]',
+				label: 'Platinum',
+			};
+			break;
+		case 'heartgold-soulsilver':
+			buttonInfo = {
+				buttonClasses:
+					'order-12 [background:linear-gradient(90deg,#AD7817_50%,#929292_50%)]',
+				label: 'HGSS',
+			};
+			break;
+		case 'black-white':
+			buttonInfo = {
+				buttonClasses:
+					'order-[13] [background:linear-gradient(90deg,black_50%,white_50%)]',
+				textClasses: '[mix-blend-mode:exclusion] font-light',
+				label: 'B/W',
+			};
+			break;
+		case 'black-2-white-2':
+			buttonInfo = {
+				buttonClasses:
+					'order-[14] [background:linear-gradient(270deg,black_50%,white_50%)]',
+				textClasses: '[mix-blend-mode:exclusion] font-light',
+				label: 'B2/W2',
+			};
+			break;
+		case 'x-y':
+			buttonInfo = {
+				buttonClasses:
+					'order-[15] [background:linear-gradient(90deg,#0A5E9A_50%,#C92341_50%)]',
+				label: 'XY',
+			};
+			break;
+		case 'omega-ruby-alpha-sapphire':
+			buttonInfo = {
+				buttonClasses:
+					'order-[16] [background:linear-gradient(90deg,#E82625_50%,#0063AC_50%)]',
+				label: 'ORAS',
+			};
+			break;
+		case 'sun-moon':
+			buttonInfo = {
+				buttonClasses:
+					'order-[17] [background:linear-gradient(90deg,#F9991C_50%,#1993D0_50%)]',
+				label: 'SM',
+			};
+			break;
+		case 'ultra-sun-ultra-moon':
+			buttonInfo = {
+				buttonClasses:
+					'order-[18] [background:linear-gradient(90deg,#AE5628_50%,#77458B_50%)]',
+				label: 'USUM',
+			};
+			break;
+		case 'lets-go-pikachu-lets-go-eevee':
+			buttonInfo = {
+				buttonClasses:
+					'order-[19] [background:linear-gradient(90deg,#E7B930_50%,#AA7848_50%)]',
+				label: 'LGPE',
+			};
+			break;
+		case 'sword-shield':
+			buttonInfo = {
+				buttonClasses:
+					'[background:linear-gradient(90deg,#00A1E9_50%,#E70059_50%)] order-[20]',
+				label: 'SwSh',
+			};
+			break;
+		default:
+			buttonInfo = {
+				buttonClasses: 'order-last',
+				textClasses: 'text-black',
+				label: capitalize(version.split('-').join(' ')),
+			};
+			break;
+	}
+	return (
+		<button
+			className={
+				className +
+				' border px-2 rounded-full relative transition-transform ' +
+				buttonInfo.buttonClasses
+			}
+			onClick={onClick}
+		>
+			<span className={'text-white ' + buttonInfo?.textClasses}>
+				{buttonInfo.label}{' '}
+			</span>
+		</button>
+	);
 };
