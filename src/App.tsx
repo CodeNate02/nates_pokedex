@@ -8,7 +8,7 @@ const queryClient = new QueryClient();
 function App() {
 	return (
 		<QueryClientProvider client={queryClient}>
-				<div className="App h-screen w-screen flex flex-col">
+				<div className="App h-full w-full flex flex-col">
 					<BrowserRouter>
 						<Routes>
 							<Route path="/" element={<Home />} />

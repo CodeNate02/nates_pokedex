@@ -29,7 +29,7 @@ const PokemonSpecies = () => {
 	if (data) {
 		let cVariant = data.variants[selected] || data.variants[0],
 			cForms = data.forms[selected] || data.forms[0]; //Get selected variant and its forms.  For error prevention, default to variant 0 if the current variant is undefined
-			page = {
+		page = {
 			upper: (
 				<>
 					<div className="mx-auto mt-5 w-fit" id="identify">
@@ -95,11 +95,10 @@ const PokemonSpecies = () => {
 			paper: (
 				<>
 					<_.FlavorText pkmn={data.species} />
-					<section className='flex w-full'>
+					<section className="flex w-full">
 						<_.Abilities abilities={cVariant.abilities} />
 						<_.MoveSet moves={cVariant.moves} />
 					</section>
-					
 				</>
 			),
 		};
@@ -116,7 +115,7 @@ const PokemonSpecies = () => {
 						<ArrowButton onClick={() => select(0)} />
 					</Link>
 				)}
-				<section className='flex flex-col items-center'>
+				<section className="flex flex-col items-center">
 					<Link
 						to="/"
 						className="w-full text-2xl text-center font-pressStart hover:underline"
@@ -134,7 +133,7 @@ const PokemonSpecies = () => {
 					</Link>
 				)}
 			</header>
-			<div className="min-h-[25%] flex flex-col content-center">
+			<div className="min-h-fit flex flex-col content-center">
 				{page.upper}
 			</div>
 			<div
