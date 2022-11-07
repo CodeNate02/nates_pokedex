@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen&display=swap');
 @font-face {
     font-family: 'Power Clear';
-    src: url('/pkmn.ttf');
+    src: url('./assets/pkmn.ttf');
 }
 @tailwind base;
 @tailwind components;

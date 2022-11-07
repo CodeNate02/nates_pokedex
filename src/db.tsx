@@ -1,3 +1,4 @@
+import { ball } from "./assets";
 /*
 	Get From DB
 	Checks if localstorage contains the information, otherwise gets the information fron the server, stores it, and presents it
@@ -155,8 +156,9 @@ export const Spinner = () => {
 	return (
 		<div className="w-20 h-20 m-auto">
 			<img
-				src="/Pokeball.svg"
+				src={ball}
 				className="m-auto animate-spin h-fit w-fit"
+				alt="Loading..."
 			/>
 		</div>
 	);

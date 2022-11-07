@@ -1,3 +1,4 @@
+import { api_logo } from '../assets';
 import Searchbar from '../components/Searchbar';
 const Home = () => {
 	return (
@@ -12,7 +13,7 @@ const Home = () => {
 					className="text-blue-500 border-blue-500 hover:border-b"
 				>
 					<img
-						src="pokeapi_logo.png"
+						src={api_logo}
 						alt="PokéApi"
 						width={50}
 						className="inline align-baseline "
