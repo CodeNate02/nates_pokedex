@@ -36,4 +36,5 @@ const TYPE_STYLES: { [type: string]: string } = {
 	steel: 'bg-stone-200 border-zinc-400',
 	unknown: '',
 	fairy: 'bg-pink-200 border-rose-400',
+	shadow: 'bg-purple-200'
 };
