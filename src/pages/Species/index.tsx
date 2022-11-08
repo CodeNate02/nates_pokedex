@@ -105,7 +105,7 @@ const PokemonSpecies = () => {
 		};
 	}
 	document.title = `${capitalize(
-		data?.species.name || info
+		data?.species.name ?? info , 'all', '-'
 	)} - Nate's Pokédex`;
 	return (
 		<>

@@ -3,6 +3,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import Home from './pages/Home.page';
 import { Routes } from 'react-router';
 import Species from './pages/Species';
+import Move from './pages/Move';
 
 const queryClient = new QueryClient();
 function App() {
@@ -22,6 +23,12 @@ function App() {
 								path="/species/:id"
 								element={
 									<Species /> /*Info on specific Pokemon species */
+								}
+							/>
+							<Route
+								path="/move/:id"
+								element={
+									<Move />
 								}
 							/>
 						</Routes>

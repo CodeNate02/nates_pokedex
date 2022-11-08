@@ -123,7 +123,7 @@ const MoveTable = (props: any) => {
 						}`}
 					>
 						<td className="odd:bg-blue-800/10 pr-2">
-							{capitalize(item.name.split('-').join(' '))}
+							{capitalize(item.name,'all','-',' ')}
 						</td>
 						{props?.include_learned && (
 							<td className="pr-2"> Level {item.level}</td>
@@ -291,7 +291,7 @@ const VersionButton = ({ version, className, onClick }: any) => {
 			buttonInfo = {
 				buttonClasses: 'order-last',
 				textClasses: 'text-black',
-				label: capitalize(version.split('-').join(' ')),
+				label: capitalize(version,'all','-',''),
 			};
 			break;
 	}
@@ -324,7 +324,7 @@ const organizeVersionGroups = async (moves: any[]) => {
 				type: moveData.type,
 				method: vg.move_learn_method.name,
 				level: vg.level_learned_at,
-				class: capitalize(moveData.damage_class.name),
+				class: capitalize(moveData.damage_class.name,'first'),
 				acc: moveData.accuracy,
 				power: moveData.power,
 			};

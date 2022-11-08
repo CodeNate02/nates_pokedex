@@ -8,10 +8,12 @@ const Searchbar = ({
 	searchType = 'pokemon-species',
 	routeTo = 'species',
 	placeHolder = 'Turtwig',
+	splitChar = '-',
 }: {
 	searchType?: string;
 	routeTo?: string;
 	placeHolder?: string;
+	splitChar?: string;
 }) => {
 	const navigate = useNavigate(),
 		ref = useRef<HTMLInputElement>(null);
@@ -21,9 +23,9 @@ const Searchbar = ({
 	);
 	const search = async (term: string) => {
 		if (term.length < 1) return {};
-		searchDB(searchType, term).then(data => {
+		searchDB(searchType, term.replaceAll(splitChar,'-')).then(data => {
 			if (data) {
-				navigate(`/${routeTo}/${term}`);
+				navigate(`/${routeTo}/${term.replaceAll(splitChar,'-')}`);
 			}
 		});
 	};
@@ -40,9 +42,7 @@ const Searchbar = ({
 				<option
 					key={index}
 					aria-label={item}
-					value={capitalize(item.name.split('-').join(' '))
-						.split(' ')
-						.join('-')}
+					value={capitalize(item.name, undefined, '-', splitChar)}
 				/>
 			)
 		);
@@ -64,7 +64,10 @@ const Searchbar = ({
 					}
 				}}
 			/>
-			<datalist id="names"> <p> {list} </p></datalist>
+			<datalist id="names">
+				{' '}
+				<p> {list} </p>
+			</datalist>
 			<button
 				aria-label={`Search ${searchType.replaceAll('-', ' ')}`}
 				type="button"
