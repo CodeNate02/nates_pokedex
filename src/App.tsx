@@ -9,7 +9,7 @@ function App() {
 	return (
 		<QueryClientProvider client={queryClient}>
 				<div className="App h-full w-full flex flex-col">
-					<BrowserRouter>
+					<BrowserRouter basename='/nrw4912/portfolio/pokedex'>
 						<Routes>
 							<Route path="/" element={<Home />} />
 							<Route
