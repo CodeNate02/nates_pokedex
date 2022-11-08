@@ -61,7 +61,7 @@ const MoveSet = ({ moves }: any) => {
 								className={
 									selected == item
 										? 'drop-shadow-xl scale-125 '
-										: ''
+										: 'hover:scale-105'
 								}
 							></VersionButton>
 						))}
