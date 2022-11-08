@@ -13,6 +13,7 @@ import Searchbar from '../../components/Searchbar';
 
 const PokemonSpecies = () => {
 	const info = useParams().id?.toLowerCase(), //id checks the URL
+	//const info = window.location.hash.slice(1).toLowerCase(),
 		{ isLoading, data, error } = useQuery([info], () => {
 			select(0);
 			return getSpeciesInfo(info || 'emptyString');
@@ -106,7 +107,6 @@ const PokemonSpecies = () => {
 	document.title = `${capitalize(
 		data?.species.name || info
 	)} - Nate's Pokédex`;
-
 	return (
 		<>
 			<header className="static flex flex-wrap items-center justify-center w-full p-2 bg-stone-900/50">

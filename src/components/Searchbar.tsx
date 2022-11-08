@@ -39,6 +39,7 @@ const Searchbar = ({
 			) => (
 				<option
 					key={index}
+					aria-label={item}
 					value={capitalize(item.name.split('-').join(' '))
 						.split(' ')
 						.join('-')}
@@ -49,7 +50,9 @@ const Searchbar = ({
 	return (
 		<div className="flex overflow-hidden font-medium border-2 border-black rounded-xl w-80">
 			<input
+				aria-label={`Search ${searchType.replaceAll('-', ' ')} Bar`}
 				type="text"
+				name="searchBar"
 				className="p-1 grow"
 				list="names"
 				placeholder={placeHolder}
@@ -61,8 +64,11 @@ const Searchbar = ({
 					}
 				}}
 			/>
-			<datalist id="names">{list}</datalist>
+			<datalist id="names"> <p> {list} </p></datalist>
 			<button
+				aria-label={`Search ${searchType.replaceAll('-', ' ')}`}
+				type="button"
+				name="search"
 				className="relative px-2 border border-gray-600 w-fit active:left-px active:shadow-inner bg-slate-300"
 				onClick={() => {
 					if (ref.current) {
