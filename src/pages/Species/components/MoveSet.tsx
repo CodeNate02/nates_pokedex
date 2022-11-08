@@ -2,16 +2,24 @@ import { useEffect, useState, useMemo } from 'react';
 import { capitalize } from '../../../utils';
 import { Spinner, getFromDB } from '../../../db';
 import TypeIcons from '../../../components/TypeIcons';
+var calcing = 0;
 const MoveSet = ({ moves }: any) => {
 	const [formatted, setFormatted] = useState<'loading' | any>('loading');
 	const [selected, setSelected] = useState<string>('sword-shield');
 	useEffect(() => {
 		setFormatted('loading');
+		//Calcing checks number of currently promised calculations
+		calcing += 1;
+		let id = calcing;
 		organizeVersionGroups(moves).then(x => {
-			if (!x[selected]) {
-				setSelected(Object.keys(x)[0]);
+			if (id == calcing) {
+				//If this task is the newest promise, it's the one we want to set.
+				if (!x[selected]) {
+					setSelected(Object.keys(x)[0]);
+				}
+				setFormatted(x);
+				calcing = 0; //Once it's set, calcing can be set back to 0.
 			}
-			setFormatted(x);
 		});
 	}, [moves]);
 	const vMoves = useMemo(() => {
@@ -92,8 +100,8 @@ const MoveTable = (props: any) => {
 				<tr
 					className={`grid ${
 						props.include_learned
-							? 'grid-cols-[2fr_6em_6em_6em_6em_6em]'
-							: 'grid-cols-[2fr_6em_6em_6em_6em]'
+							? 'grid-cols-[2fr_6em_6em_6em_4.5em_4.5em]'
+							: 'grid-cols-[2fr_6em_6em_4.5em_4.5em]'
 					}`}
 				>
 					<td>Name</td>
@@ -108,22 +116,26 @@ const MoveTable = (props: any) => {
 				{props.moves.map((item: any, index: number) => (
 					<tr
 						key={index}
-						className={`odd:bg-black/10 grid ${
+						className={`odd:bg-black/10 grid text-right relative origin-bottom-left hover:scale-105 hover:cursor-pointer hover:bg-blue-50 ${
 							props.include_learned
-								? 'grid-cols-[2fr_6em_6em_6em_6em_6em]'
-								: 'grid-cols-[2fr_6em_6em_6em_6em]'
+								? 'grid-cols-[2fr_6em_6em_6em_3em_4.5em]'
+								: 'grid-cols-[2fr_6em_6em_4.5em_4.5em]'
 						}`}
 					>
-						<td className="odd:bg-blue-800/10">
+						<td className="odd:bg-blue-800/10 pr-2">
 							{capitalize(item.name.split('-').join(' '))}
 						</td>
-						{props?.include_learned && <td> Level {item.level}</td>}
-						<td>{item.class}</td>
-						<td className="my-auto">
+						{props?.include_learned && (
+							<td className="pr-2"> Level {item.level}</td>
+						)}
+						<td className="pr-2 bg-blue-400/10">{item.class}</td>
+						<td className="my-auto text-center">
 							<TypeIcons typing={[item]} />
 						</td>
-						<td>{item.power}</td>
-						<td>{item.acc ? `${item.acc}%` : ''}</td>
+						<td className="pr-2 bg-blue-400/10">{item.power}</td>
+						<td className="pr-2">
+							{item.acc ? `${item.acc}%` : ''}
+						</td>
 					</tr>
 				))}
 			</tbody>
@@ -285,6 +297,7 @@ const VersionButton = ({ version, className, onClick }: any) => {
 	}
 	return (
 		<button
+			type="button"
 			className={
 				className +
 				' border px-2 rounded-full relative transition-transform ' +
