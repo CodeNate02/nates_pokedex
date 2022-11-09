@@ -8,6 +8,7 @@ import { getSpeciesInfo, Spinner } from '../../db';
 
 import { HiSparkles } from 'react-icons/hi2';
 import _ from './components';
+import FlavorText from '../../components/FlavorTexts';
 import { ArrowButton } from '../../components/ArrowButton';
 import Searchbar from '../../components/Searchbar';
 
@@ -95,7 +96,7 @@ const PokemonSpecies = () => {
 			),
 			paper: (
 				<>
-					<_.FlavorText pkmn={data.species} />
+					<FlavorText pkmn={data.species} />
 					<section className="flex w-full">
 						<_.Abilities abilities={cVariant.abilities} />
 						<_.MoveSet moves={cVariant.moves} />

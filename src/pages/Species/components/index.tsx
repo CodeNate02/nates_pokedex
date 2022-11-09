@@ -1,5 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { ArrowButton } from '../../../components/ArrowButton';
+import { useMemo } from 'react';
 import TypeIcons from '../../../components/TypeIcons';
 import { capitalize } from '../../../utils';
 import MoveSet from './MoveSet';
@@ -182,66 +181,6 @@ const Stats = ({ pkmnStats }: any) => {
 	);
 };
 
-const FlavorText = ({ pkmn }: any) => {
-	const flavorText = useRef<HTMLElement>(null);
-	const [text, setText] = useState(0);
-	useEffect(() => {
-		setText(0);
-	}, [pkmn]);
-	const FlavorTexts = useMemo(() => {
-		setText(0);
-		return pkmn.flavor_text_entries.filter(
-			(x: any) => x.language.name == 'en'
-		);
-	}, [pkmn]);
-
-	const transitionText = (n: number) => {
-		let newText = text + n;
-		if (newText < 0)
-			newText = FlavorTexts.length - 1; //Loop around dex entry
-		else if (newText >= FlavorTexts.length) newText = 0;
-		if (newText != text) {
-			//testing testing 123
-			flavorText.current && (flavorText.current.style.opacity = '0');
-			setTimeout(() => {
-				setText(newText);
-				flavorText.current && (flavorText.current.style.opacity = '1');
-			}, 100);
-		}
-	};
-
-	return (
-		<section
-			id="FlavorText"
-			className="flex items-center justify-center w-full mb-5 border-b border-dashed h-36 border-black/25"
-		>
-			<ArrowButton
-				onClick={() => transitionText(-1)}
-				className="w-5 h-5"
-			/>
-			<section
-				ref={flavorText}
-				className="max-w-lg px-5 transition-opacity"
-			>
-				<p>{FlavorTexts[text]?.flavor_text || 'error'}</p>
-				<p className="w-full italic text-right">
-					-Pokémon{' '}
-					{FlavorTexts[text]?.version?.name &&
-						capitalize(
-							FlavorTexts[text].version.name,
-							'all',
-							'-',
-							' '
-						)}
-				</p>
-			</section>
-			<ArrowButton
-				onClick={() => transitionText(1)}
-				className="w-5 h-5 rotate-180"
-			/>
-		</section>
-	);
-};
 /* Dex Numbers lists a bold heading of the Pkmn's canonical National Dex number, and a list of  */
 const DexNumbers = ({ entries }: any) => {
 	const e = useMemo(() => {
@@ -308,7 +247,6 @@ export default {
 	PkmnImage,
 	PkmnForms,
 	Stats,
-	FlavorText,
 	DexNumbers,
 	Abilities,
 	MoveSet,

@@ -17,7 +17,7 @@ const Searchbar = ({
 }) => {
 	const navigate = useNavigate(),
 		ref = useRef<HTMLInputElement>(null);
-	const { isLoading, error, data } = useQuery([], () =>
+	const { isLoading, error, data } = useQuery([searchType], () =>
 		//Query data
 		getFromDB(`https://pokeapi.co/api/v2/${searchType}?limit=100000`)
 	);
@@ -54,7 +54,7 @@ const Searchbar = ({
 				type="text"
 				name="searchBar"
 				className="p-1 grow"
-				list="names"
+				list={`${searchType}_names`}
 				placeholder={placeHolder}
 				ref={ref}
 				onKeyDown={e => {
@@ -64,9 +64,8 @@ const Searchbar = ({
 					}
 				}}
 			/>
-			<datalist id="names">
-				{' '}
-				<p> {list} </p>
+			<datalist id={`${searchType}_names`}>
+				{list}
 			</datalist>
 			<button
 				aria-label={`Search ${searchType.replaceAll('-', ' ')}`}
