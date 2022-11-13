@@ -1,8 +1,7 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { ArrowButton } from '../../../components/ArrowButton';
+import { useMemo } from 'react';
 import TypeIcons from '../../../components/TypeIcons';
 import { capitalize } from '../../../utils';
-import MoveSet from './MoveSet'
+import MoveSet from './MoveSet';
 import { decamark, missingno } from '../../../assets';
 
 /* Form Tabs Formats/Creates tabs on top of Pokémon entry to navigate through various forms*/
@@ -25,8 +24,7 @@ const VariantTabs = ({
 					//Check if the form-name varies from the species-name
 					n = n.slice(species.length + 1); //The DB's format begins form names with their default forms.  This is unnecessary and clutter-generating, so we can slice that part off
 				}
-				n = n[0].toUpperCase() + n.slice(1); //Capitalize the first letter
-				n = capitalize(n.split('-').join(' '));
+				n = capitalize(n, 'all', '-', ' ');
 				r.push(n); //Add the name to the array
 			}
 			return r;
@@ -128,8 +126,7 @@ const PkmnForms = ({ formsArray, shiny }: any) => {
 			{formsArray.map((form: any, index: number) => (
 				<div key={index}>
 					<h3 className="text-center">
-						{' '}
-						{capitalize(form.form_name || 'base')}{' '}
+						{capitalize(form.form_name || 'base', 'all', '-', ' ')}
 					</h3>
 					<PkmnImage
 						className="w-20 h-20"
@@ -145,8 +142,7 @@ const PkmnForms = ({ formsArray, shiny }: any) => {
 	return (
 		<div className="relative flex flex-wrap justify-around p-1 mx-auto mt-1 border border-black w-fit gap-x-2 rounded-3xl bg-stone-100">
 			<h4 className="top-0 w-full space-x-0 font-bold leading-none text-center underline bold">
-				{' '}
-				Alternate Forms{' '}
+				Alternate Forms
 			</h4>
 			{content}
 		</div>
@@ -161,8 +157,7 @@ const Stats = ({ pkmnStats }: any) => {
 					className="col-span-1 m-auto text-xs text-center align-middle font-screen"
 					key={index}
 				>
-					{' '}
-					{capitalize(item.stat.name.replace('-', ' '))}{' '}
+					{item.stat.name.toUpperCase().replaceAll('-', ' ')}
 				</p>
 			))}
 			{pkmnStats.map((item: any, index: number) => (
@@ -186,63 +181,6 @@ const Stats = ({ pkmnStats }: any) => {
 	);
 };
 
-const FlavorText = ({ pkmn }: any) => {
-	const flavorText = useRef<HTMLElement>(null);
-	const [text, setText] = useState(0);
-	useEffect(() => {
-		setText(0);
-	}, [pkmn]);
-	const FlavorTexts = useMemo(() => {
-		setText(0);
-		return pkmn.flavor_text_entries.filter(
-			(x: any) => x.language.name == 'en'
-		);
-	}, [pkmn]);
-
-	const transitionText = (n: number) => {
-		let newText = text + n;
-		if (newText < 0)
-			newText = FlavorTexts.length - 1; //Loop around dex entry
-		else if (newText >= FlavorTexts.length) newText = 0;
-		if (newText != text) {
-			//testing testing 123
-			flavorText.current && (flavorText.current.style.opacity = '0');
-			setTimeout(() => {
-				setText(newText);
-				flavorText.current && (flavorText.current.style.opacity = '1');
-			}, 100);
-		}
-	};
-
-	return (
-		<section
-			id="FlavorText"
-			className="flex items-center justify-center w-full mb-5 border-b border-dashed h-36 border-black/25"
-		>
-			<ArrowButton
-				onClick={() => transitionText(-1)}
-				className="w-5 h-5"
-			/>
-			<section
-				ref={flavorText}
-				className="max-w-lg px-5 transition-opacity"
-			>
-				<p>{FlavorTexts[text]?.flavor_text || 'error'}</p>
-				<p className="w-full italic text-right">
-					-Pokémon{' '}
-					{FlavorTexts[text]?.version?.name &&
-						capitalize(
-							FlavorTexts[text].version.name.split('-').join(' ')
-						)}
-				</p>
-			</section>
-			<ArrowButton
-				onClick={() => transitionText(1)}
-				className="w-5 h-5 rotate-180"
-			/>
-		</section>
-	);
-};
 /* Dex Numbers lists a bold heading of the Pkmn's canonical National Dex number, and a list of  */
 const DexNumbers = ({ entries }: any) => {
 	const e = useMemo(() => {
@@ -267,7 +205,10 @@ const DexNumbers = ({ entries }: any) => {
 					{e.dex.map((item: any, index: number) => (
 						<li key={index}>
 							{`${capitalize(
-								item.pokedex.name.split('-').join(' ')
+								item.pokedex.name,
+								'all',
+								'-',
+								' '
 							)} #${item.entry_number} `}
 						</li>
 					))}
@@ -288,12 +229,12 @@ const Abilities = ({ abilities }: any) => {
 						key={index}
 						className="border-t border-black min-h-[4rem] w-28 flex flex-col justify-center"
 					>
-						{capitalize(item.ability.name.split('-').join(' '))}
-						{item.is_hidden ? (
+						{capitalize(item.ability.name, 'all', '-', ' ')}
+						{item.is_hidden && (
 							<span className="block text-xs font-extralight">
 								Hidden
 							</span>
-						) : undefined}
+						)}
 					</li>
 				))}
 			</ul>
@@ -301,15 +242,11 @@ const Abilities = ({ abilities }: any) => {
 	);
 };
 
-
-
-
 export default {
 	VariantTabs,
 	PkmnImage,
 	PkmnForms,
 	Stats,
-	FlavorText,
 	DexNumbers,
 	Abilities,
 	MoveSet,

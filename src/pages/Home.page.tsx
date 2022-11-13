@@ -21,7 +21,11 @@ const Home = () => {
 				</a>
 				<br /> Search below to begin!
 			</p>
+			<br/>
+			<h6 className='underline font-pkmn'> Pokémon: </h6>
 			<Searchbar />
+			<h6 className='underline font-pkmn'> Moves: </h6>
+			<Searchbar placeHolder="Earthquake" routeTo='move' searchType="move" splitChar=' '/>
 		</div>
 	);
 };

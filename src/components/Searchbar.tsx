@@ -8,22 +8,24 @@ const Searchbar = ({
 	searchType = 'pokemon-species',
 	routeTo = 'species',
 	placeHolder = 'Turtwig',
+	splitChar = '-',
 }: {
 	searchType?: string;
 	routeTo?: string;
 	placeHolder?: string;
+	splitChar?: string;
 }) => {
 	const navigate = useNavigate(),
 		ref = useRef<HTMLInputElement>(null);
-	const { isLoading, error, data } = useQuery([], () =>
+	const { isLoading, error, data } = useQuery([searchType], () =>
 		//Query data
 		getFromDB(`https://pokeapi.co/api/v2/${searchType}?limit=100000`)
 	);
 	const search = async (term: string) => {
 		if (term.length < 1) return {};
-		searchDB(searchType, term).then(data => {
+		searchDB(searchType, term.replaceAll(splitChar,'-')).then(data => {
 			if (data) {
-				navigate(`/${routeTo}/${term}`);
+				navigate(`/${routeTo}/${term.replaceAll(splitChar,'-')}`);
 			}
 		});
 	};
@@ -39,9 +41,8 @@ const Searchbar = ({
 			) => (
 				<option
 					key={index}
-					value={capitalize(item.name.split('-').join(' '))
-						.split(' ')
-						.join('-')}
+					aria-label={item}
+					value={capitalize(item.name, undefined, '-', splitChar)}
 				/>
 			)
 		);
@@ -49,9 +50,11 @@ const Searchbar = ({
 	return (
 		<div className="flex overflow-hidden font-medium border-2 border-black rounded-xl w-80">
 			<input
+				aria-label={`Search ${searchType.replaceAll('-', ' ')} Bar`}
 				type="text"
+				name="searchBar"
 				className="p-1 grow"
-				list="names"
+				list={`${searchType}_names`}
 				placeholder={placeHolder}
 				ref={ref}
 				onKeyDown={e => {
@@ -61,8 +64,13 @@ const Searchbar = ({
 					}
 				}}
 			/>
-			<datalist id="names">{list}</datalist>
+			<datalist id={`${searchType}_names`}>
+				{list}
+			</datalist>
 			<button
+				aria-label={`Search ${searchType.replaceAll('-', ' ')}`}
+				type="button"
+				name="search"
 				className="relative px-2 border border-gray-600 w-fit active:left-px active:shadow-inner bg-slate-300"
 				onClick={() => {
 					if (ref.current) {

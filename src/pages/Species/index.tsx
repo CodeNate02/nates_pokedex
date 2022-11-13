@@ -8,11 +8,13 @@ import { getSpeciesInfo, Spinner } from '../../db';
 
 import { HiSparkles } from 'react-icons/hi2';
 import _ from './components';
+import FlavorText from '../../components/FlavorTexts';
 import { ArrowButton } from '../../components/ArrowButton';
 import Searchbar from '../../components/Searchbar';
 
 const PokemonSpecies = () => {
 	const info = useParams().id?.toLowerCase(), //id checks the URL
+	//const info = window.location.hash.slice(1).toLowerCase(),
 		{ isLoading, data, error } = useQuery([info], () => {
 			select(0);
 			return getSpeciesInfo(info || 'emptyString');
@@ -94,7 +96,7 @@ const PokemonSpecies = () => {
 			),
 			paper: (
 				<>
-					<_.FlavorText pkmn={data.species} />
+					<FlavorText pkmn={data.species} />
 					<section className="flex w-full">
 						<_.Abilities abilities={cVariant.abilities} />
 						<_.MoveSet moves={cVariant.moves} />
@@ -104,9 +106,8 @@ const PokemonSpecies = () => {
 		};
 	}
 	document.title = `${capitalize(
-		data?.species.name || info
+		data?.species.name ?? info , 'all', '-'
 	)} - Nate's Pokédex`;
-
 	return (
 		<>
 			<header className="static flex flex-wrap items-center justify-center w-full p-2 bg-stone-900/50">
