@@ -92,8 +92,8 @@ const MoveTable = (props: any) => {
 				<tr
 					className={`grid ${
 						props.include_learned
-							? 'grid-cols-[2fr_6em_6em_6em_4em_4em]'
-							: 'grid-cols-[2fr_6em_6em_4em_4em]'
+							? 'grid-cols-[2fr_6em_6em_6em_6em_6em]'
+							: 'grid-cols-[2fr_6em_6em_6em_6em]'
 					}`}
 				>
 					<td>Name</td>
@@ -110,8 +110,8 @@ const MoveTable = (props: any) => {
 						key={index}
 						className={`odd:bg-black/10 grid ${
 							props.include_learned
-								? 'grid-cols-[2fr_6em_6em_6em_4em_4em]'
-								: 'grid-cols-[2fr_6em_6em_4em_4em]'
+								? 'grid-cols-[2fr_6em_6em_6em_6em_6em]'
+								: 'grid-cols-[2fr_6em_6em_6em_6em]'
 						}`}
 					>
 						<td className="odd:bg-blue-800/10">

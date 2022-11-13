@@ -3,6 +3,5 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  base:'/nrw4912/portfolio/pokedex'
+  plugins: [react()]
 })
